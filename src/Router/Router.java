@@ -2,6 +2,17 @@ package Router;
 import java.util.HashMap;
 
 public class Router {
+    private ForwardingService service;
+    private int id;
+
+    Router(){
+        service = new ForwardingService();
+    }
+
+    public static void main(String[] args) {
+        
+    }
+
     
 }
 class ForwardingService {
@@ -12,16 +23,26 @@ class ForwardingService {
         forwardingTable = new HashMap<>();
     }
 
-    public int forward(String dest){
+    public void forward(Byte[] data, String dest){
         if(forwardingTable.containsKey(dest))
-            return forwardingTable.get(dest);
+            send(data, forwardingTable.get(dest));
         else
             contactController(dest);
-            return forwardingTable.get(dest);
+            
+            send(data, forwardingTable.get(dest));
     }
 
     private void contactController(String dest){
         // TODO
+        // contact controller
+        receive();
     }
 
+    private void send(Byte[] data, int dest){
+        // TODO
+    }
+
+    private void receive(){
+        // TODO
+    }
 }
