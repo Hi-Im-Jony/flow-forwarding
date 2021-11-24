@@ -10,11 +10,11 @@ public class Node {
     final static int DESTINATION = 1;
     final static int MTU = 1500;
     final static int NODE_PORT = 1;
-    DatagramSocket NodeSocket;
+    static DatagramSocket NodeSocket;
 
     private static class App extends Thread{
         DatagramSocket AppSocket;
-    @Override
+        @Override
         public void run(){
             System.out.println("Hello from App");
            
@@ -41,11 +41,12 @@ public class Node {
                 for(int i = 0; i<header.length;i++)
                     packet[i] = header[i];
                 
-                for(int i = header.length; i<dataInBytes.length+header.length;i++)
-                    packet[i] = dataInBytes[i];
+                for(int i = header.length; i<(dataInBytes.length+header.length);i++)
+                    packet[i] = dataInBytes[i-header.length];
 
                 // packet done
                 while(true){
+                    System.out.println("Sending to Node");
                     send(packet, NODE_PORT);
                     Thread.sleep(2000);
                 }
@@ -70,13 +71,19 @@ public class Node {
         }
 }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         App demo = new App();
-        demo.run();
+        demo.start();
         System.out.println("Hello from Node");
+        NodeSocket = new DatagramSocket(NODE_PORT);
+        while(true){
+            System.out.println("Receiving...");
+            receive();
+        }
     }
 
-    public byte[] receive() throws IOException{
+    public static byte[] receive() throws IOException{
+
             
             byte[] data= new byte[MTU];
             DatagramPacket packet= new DatagramPacket(data, data.length);
@@ -86,7 +93,7 @@ public class Node {
             // extract data from packet
             data= packet.getData();
 
-            System.out.println("Received: \""+data+",\" from: "+packet.getAddress());
+            System.out.println("Node received: \""+data+",\" from: "+packet.getAddress());
             return data;
         }
 
