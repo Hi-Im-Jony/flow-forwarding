@@ -21,13 +21,13 @@ public class ForwardingService  {
         System.out.println("Hello from FS");
     }
 
-    public void forward(byte[] data, String dest) throws IOException{
+    private static void forward(byte[] data, int dest) throws IOException{
         if(forwardingTable.containsKey(dest))
             send(data, forwardingTable.get(dest));
         else{
-            contactController(dest);
-            
-            send(data, forwardingTable.get(dest));
+            // TODO: dropping packet for now
+            // contactController(dest);
+            // send(data, forwardingTable.get(dest));
         }
             
     }
@@ -35,7 +35,6 @@ public class ForwardingService  {
     private void contactController(String dest) throws IOException{
         // TODO
         // contact controller
-        receive();
     }
 
     public static byte[] receive() throws IOException{
@@ -49,10 +48,15 @@ public class ForwardingService  {
         data= packet.getData();
 
         System.out.println("Node received: \""+data+",\" from: "+packet.getAddress());
+
+        // TODO extrapolate data
+
+        int dest = 0;
+        forward(data, dest);
         return data;
     }
 
-    public void send(byte[] data, int dest) throws IOException{
+    public static void send(byte[] data, int dest) throws IOException{
         
         InetAddress address= InetAddress.getLocalHost();   
         int port= dest;                       
