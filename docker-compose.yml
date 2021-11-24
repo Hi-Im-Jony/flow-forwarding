@@ -1,1 +1,16 @@
+version: "3"
 
+services:
+  router:
+    build: src/Router/
+    command: bash -c "java Router.java && java ForwardingService.java"
+
+  node:
+    build: src/Node/
+    command: java Node.java
+
+  tcpdump:
+    image: kaazing/tcpdump
+    network_mode: "host"
+    volumes:
+      - ./tcpdump:/tcpdump

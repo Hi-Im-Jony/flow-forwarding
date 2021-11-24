@@ -1,22 +1,26 @@
 package Node;
 
-class App{
-    public static void main(String[] args) {
-        // TODO
-    }
-}
+
 public class Node {
-    App demo;
+
+    private static class App extends Thread{
+    @Override
+        public void run(){
+            System.out.println("Hello from App");
+        }
+}
 
     public static void main(String[] args) {
-        // TODO
+        App demo = new App();
+        demo.run();
+        System.out.println("Hello from Node");
     }
 
     private static void send(){
-        // TODO
+        // TODO send UDP packets
     }
 
     private static void receive(){
-        // TODO
+        // TODO receive UDP packets
     }
 }
