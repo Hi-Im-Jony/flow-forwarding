@@ -83,27 +83,26 @@ public class Node {
     }
 
     public static byte[] receive() throws IOException{
-
             
-            byte[] data= new byte[MTU];
-            DatagramPacket packet= new DatagramPacket(data, data.length);
+        byte[] data= new byte[MTU];
+        DatagramPacket packet= new DatagramPacket(data, data.length);
+    
+        NodeSocket.receive(packet);
+
+        // extract data from packet
+        data= packet.getData();
+
+        System.out.println("Node received: \""+data+",\" from: "+packet.getAddress());
+        return data;
+    }
+
+    public void send(byte[] data, int dest) throws IOException{
         
-            NodeSocket.receive(packet);
-
-            // extract data from packet
-            data= packet.getData();
-
-            System.out.println("Node received: \""+data+",\" from: "+packet.getAddress());
-            return data;
-        }
-
-        public void send(byte[] data, int dest) throws IOException{
-            
-            InetAddress address= InetAddress.getLocalHost();   
-            int port= dest;                       
-        
-            // create packet addressed to destination
-            DatagramPacket packet= new DatagramPacket(data, data.length, address, port);
-            NodeSocket.send(packet);
-        }
+        InetAddress address= InetAddress.getLocalHost();   
+        int port= dest;                       
+    
+        // create packet addressed to destination
+        DatagramPacket packet= new DatagramPacket(data, data.length, address, port);
+        NodeSocket.send(packet);
+    }
 }
