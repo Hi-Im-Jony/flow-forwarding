@@ -59,21 +59,6 @@ public class Node {
             
         }
 
-        public byte[] receive() throws IOException{
-            
-            // create buffer for data, packet and AppSocket
-            byte[] data= new byte[MTU];
-            DatagramPacket packet= new DatagramPacket(data, data.length);
-        
-            AppSocket.receive(packet);
-
-            // extract data from packet
-            data= packet.getData();
-
-            System.out.println("Received: \""+data+",\" from port:"+packet.getPort());
-            return data;
-        }
-
         public void send(byte[] payload, int dest) throws IOException{
             
             InetAddress address= InetAddress.getLocalHost();   
