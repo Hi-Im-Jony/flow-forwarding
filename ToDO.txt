@@ -1,0 +1,24 @@
+App:
+    - Prompts Node to send packets
+    - "Randomly" generates packets for Node
+
+Node:
+    - Listens/Sends packets
+    - Hosts App thread
+    - Hardcoded default router connection 
+
+
+------------------------------------------------------------
+In same docker container:
+Forwarding services:
+    - Listen for packets
+    - Examine header info
+    - Forward packet if it "knows" where to forwad it to
+    - Drop packet otherwise (for now)
+    - Bound to port 51510 of "machine"
+
+Routers:
+    - Listens/Sends packets
+    - Hosts a forwarding service
+    - Hardcoded connections (for now)
+------------------------------------------------------------
