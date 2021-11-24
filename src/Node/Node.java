@@ -6,8 +6,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class Node {
+    // head types
     final static int COMBINATION = 0;
     final static int DESTINATION = 1;
+
+    // Datagram stuff
     final static int MTU = 1500;
     final static int NODE_PORT = 1;
     static DatagramSocket NodeSocket;
