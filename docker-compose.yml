@@ -8,6 +8,7 @@ services:
   node:
     build: src/Node/
     command: java Node.java
+    network_mode: "host"
 
   tcpdump:
     image: kaazing/tcpdump
