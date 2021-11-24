@@ -22,7 +22,7 @@ public class Node {
             try {
                 AppSocket = new DatagramSocket();
                 
-                // generate a payload, hard coded for now
+                // generate a packet, hard coded for now
                 byte[] header = new byte[11];
 
                 header[0] = DESTINATION;
@@ -36,17 +36,17 @@ public class Node {
                 String data = "Some Data";
                 byte[] dataInBytes = data.getBytes();
 
-                byte[] payload = new byte[header.length+dataInBytes.length];
+                byte[] packet = new byte[header.length+dataInBytes.length];
 
                 for(int i = 0; i<header.length;i++)
-                    payload[i] = header[i];
+                    packet[i] = header[i];
                 
                 for(int i = header.length; i<dataInBytes.length+header.length;i++)
-                    payload[i] = dataInBytes[i];
+                    packet[i] = dataInBytes[i];
 
-                // payload done
+                // packet done
                 while(true){
-                    send(payload, NODE_PORT);
+                    send(packet, NODE_PORT);
                     Thread.sleep(2000);
                 }
             
@@ -59,13 +59,13 @@ public class Node {
             
         }
 
-        public void send(byte[] payload, int dest) throws IOException{
+        public void send(byte[] data, int dest) throws IOException{
             
             InetAddress address= InetAddress.getLocalHost();   
             int port= dest;                       
         
             // create packet addressed to destination
-            DatagramPacket packet= new DatagramPacket(payload, payload.length, address, port);
+            DatagramPacket packet= new DatagramPacket(data, data.length, address, port);
             AppSocket.send(packet);
         }
 }
@@ -86,17 +86,17 @@ public class Node {
             // extract data from packet
             data= packet.getData();
 
-            System.out.println("Received: \""+data+",\" from port:"+packet.getPort());
+            System.out.println("Received: \""+data+",\" from: "+packet.getAddress());
             return data;
         }
 
-        public void send(byte[] payload, int dest) throws IOException{
+        public void send(byte[] data, int dest) throws IOException{
             
             InetAddress address= InetAddress.getLocalHost();   
             int port= dest;                       
         
             // create packet addressed to destination
-            DatagramPacket packet= new DatagramPacket(payload, payload.length, address, port);
+            DatagramPacket packet= new DatagramPacket(data, data.length, address, port);
             NodeSocket.send(packet);
         }
 }
