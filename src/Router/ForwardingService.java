@@ -15,7 +15,7 @@ public class ForwardingService  {
     final static int FS_REQUEST = 2;
         final static int REQUESTOR_ID = 3;
 
-        final static int MULTI_H = 3; // header that wraps around multiple header items
+        final static int PACKET_HEADER = 3; // header that wraps around multiple header items
             final static int DESTINATION_ID = 4; // end node packet is being sent to
             final static int SOURCE_ID = 5; // source of packet
             final static int PACKET_TYPE = 6; // type of packet (ie, SMS, Image, blah blah)
@@ -31,17 +31,15 @@ public class ForwardingService  {
         System.out.println("Hello from FS");
     }
 
-    private static void forward(byte[] data, int dest) throws IOException{
+    private static void forward(byte[] data, String dest) throws IOException{
         if(forwardingTable.containsKey(dest))
             send(data, forwardingTable.get(dest));
-        else{
-            // TODO: dropping packet for now
-            // contactController(dest);
-        }
+        else
             
+            contactController(data);
     }
 
-    private void contactController(String dest) throws IOException{
+    private static void contactController(byte[] data) throws IOException{
         // TODO
         // contact controller
     }
@@ -63,12 +61,12 @@ public class ForwardingService  {
 
         if(headerType == CONTROLLER_REPLY)
             interpretReply(data);
-        else if(headerType==MULTI_H)
+        else if(headerType==PACKET_HEADER)
             interpetHeader(data);
 
             
 
-        int dest = 0;
+        String dest = "";
         forward(data, dest);
         return data;
     }

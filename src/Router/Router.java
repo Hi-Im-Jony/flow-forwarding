@@ -13,7 +13,7 @@ public class Router {
     final static int FS_REQUEST = 2;
         final static int REQUESTOR_ID = 3;
 
-        final static int MULTI_H = 3; // header that wraps around multiple header items
+        final static int PACKET_HEADER = 3; // header that wraps around multiple header items
             final static int DESTINATION_ID = 4; // end node packet is being sent to
             final static int SOURCE_ID = 5; // source of packet
             final static int PACKET_TYPE = 6; // type of packet (ie, SMS, Image, blah blah)
