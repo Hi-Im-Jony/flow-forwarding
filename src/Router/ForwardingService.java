@@ -20,6 +20,7 @@ public class ForwardingService  {
             final static int DESTINATION_ID = 7; // ID of final destination
             final static int SOURCE_ID = 8; // ID of initial source
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
+            final static int PACKET = 10; // the actual packet
 
     
     final static int MTU = 1500;
@@ -85,6 +86,7 @@ public class ForwardingService  {
             System.out.println("An error has occured");
             return;
         }
+
         // check if dest is of format "tcd.scss"
         String dest = new String(headerInfo[0]);
         String[] dests = dest.split(".");
@@ -102,7 +104,7 @@ public class ForwardingService  {
             byte[] destInBytes = dest.getBytes();
 
             // redo header to change dest field
-            int newHeaderLen = 2+(2+destInBytes.length+2+headerInfo[1].length+2+headerInfo[2].length);
+            int newHeaderLen = 2+(2+destInBytes.length+2+headerInfo[1].length+2+headerInfo[2].length+2+headerInfo[3].length);
             byte[] newHeader = new byte[newHeaderLen];
             int index = 0;
             newHeader[index++] = PACKET_HEADER;
@@ -126,15 +128,22 @@ public class ForwardingService  {
                 newHeader[index++] = headerInfo[2][i];
             }
 
+            newHeader[index++] = PACKET;
+            newHeader[index++] = (byte) headerInfo[3].length;
+            for(int i = 0; i<headerInfo[3].length; i++){
+                newHeader[index++] = headerInfo[2][i];
+            }
+            forward(newHeader, dest);
+            return;
         }
 
-        // otherwise, don't drop prefix as it hasn't gotten to destination
-        forward(data, dests[0]);
+        else // don't drop prefix as it hasn't gotten to destination
+            forward(data, dest);
     }
 
     public static byte[][] interpretReply(byte[] data){
         byte[][] ret = new byte[3][];
-        byte[] routerToUpdate, update, destination, source, packetType;
+        byte[] routerToUpdate, update, destination, source, packetType, packet;
         int index = 0;
         if(data[index+=2]!=CONTROLLER_REPLY) // skip len, irrelevant
             return null;
@@ -180,12 +189,21 @@ public class ForwardingService  {
         if(data[index+=2] != PACKET_TYPE) // skip len, irrelevant
             return null;
         packetType = new byte[1];
-        packetType[0] = data[index]; 
+        packetType[0] = data[index++]; 
 
+        if(data[index++]!= PACKET)
+            return null;
+        int packetLen = data[index++];
+        packet = new byte[packetLen];
+        for(int i = 0; i<packetLen;i++){
+            packet[i] = data[index++];
+        }
+        
         
         ret[0] = destination;
         ret[1] = source;
         ret[2] = packetType;
+        ret[3] = packet;
 
         update(new String(routerToUpdate), update);
 
@@ -194,7 +212,7 @@ public class ForwardingService  {
 
     public static byte[][] interpretHeader(byte[] data){
         byte[][] ret = new byte[3][];
-        byte[] destination, source, packetType;
+        byte[] destination, source, packetType, packet;
 
         int index = 0;
 
@@ -220,11 +238,21 @@ public class ForwardingService  {
         if(data[index+=2] != PACKET_TYPE) // skip len, irrelevant
             return null;
         packetType = new byte[1];
-        packetType[0] = data[index]; 
+        packetType[0] = data[index++]; 
 
+        if(data[index++]!= PACKET)
+            return null;
+        int packetLen = data[index++];
+        packet = new byte[packetLen];
+        for(int i = 0; i<packetLen;i++){
+            packet[i] = data[index++];
+        }
+        
+        
         ret[0] = destination;
         ret[1] = source;
-        ret[3] = packetType;
+        ret[2] = packetType;
+        ret[3] = packet;
 
         return ret;
     }
