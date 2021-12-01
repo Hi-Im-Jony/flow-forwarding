@@ -27,7 +27,6 @@ public class ForwardingService  {
         else{
             // TODO: dropping packet for now
             // contactController(dest);
-            // send(data, forwardingTable.get(dest));
         }
             
     }
