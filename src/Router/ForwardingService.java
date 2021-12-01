@@ -61,11 +61,13 @@ public class ForwardingService  {
         // TODO extrapolate data
         byte headerType = data[0];
 
+        byte[][] headerInfo = null;
         if(headerType == CONTROLLER_REPLY)
-            interpretReply(data);
+            headerInfo = interpretReply(data);
         else if(headerType==PACKET_HEADER)
-            interpetHeader(data);
-
+            headerInfo = interpretHeader(data);
+        if(headerInfo == null)
+            System.out.println("An error has occured");
             
 
         String dest = "";
@@ -78,15 +80,12 @@ public class ForwardingService  {
         byte[][] ret = new byte[5][];
         byte[] routerToUpdate, update, destination, source, packetType;
         int index = 0;
-        if(data[index]!=CONTROLLER_REPLY)
+        if(data[index+=2]!=CONTROLLER_REPLY) // skip len, irrelevant
             return null;
         
-        index = 2;// can safely skip controller reply length, its irrelevant
-        if(data[index]!=UPDATE)
+        if(data[index+=2]!=UPDATE) // skip len, irrelevant
             return null;
         
-
-        index = 4; // can safely skip update length, we know it is two
         if(data[index++]!=ROUTER_ID)
             return null;
         int routerIdLen = data[index++]; 
@@ -95,12 +94,14 @@ public class ForwardingService  {
             routerToUpdate[i] = data[index++];
         }
 
-
         if(data[index++]!=UPDATED_VAL)
             return null;
         index++; // can safely skip update val length, we know it is 1
         update = new byte[1];
         update[0] =  data[index++];
+        
+        if(data[index+=2] != PACKET_HEADER) // skip len, irrelevant
+            return null;
         
         if(data[index++] != DESTINATION_ID)
             return null;
@@ -132,8 +133,8 @@ public class ForwardingService  {
         return ret;
     }
 
-    public static byte[] interpetHeader(byte[] data){
-        // TODO
+    public static byte[][] interpretHeader(byte[] data){
+        
 
         return null;
     }
