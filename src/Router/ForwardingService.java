@@ -73,36 +73,61 @@ public class ForwardingService  {
         return data;
     }
 
-    public static byte[] interpretReply(byte[] data){
+    public static byte[][] interpretReply(byte[] data){
         // TODO
-        byte[] ret = new byte[5];
-        byte  routerToUpdate, update, packetType;
-        byte[] destination, source;
+        byte[][] ret = new byte[5][];
+        byte[] routerToUpdate, update, destination, source, packetType;
         int index = 0;
         if(data[index]!=CONTROLLER_REPLY)
             return null;
-        // can safely skip controller reply length, its irrelevant
-
-        index = 2;
+        
+        index = 2;// can safely skip controller reply length, its irrelevant
         if(data[index]!=UPDATE)
             return null;
-        // can safely skip update length, we know it is two
-        routerToUpdate = data[index];
-        update = data[++index];
-        if(data[++index] != DESTINATION_ID)
-            return null;
+        
 
-        int destinationLenght = data[++index];
+        index = 4; // can safely skip update length, we know it is two
+        if(data[index++]!=ROUTER_ID)
+            return null;
+        int routerIdLen = data[index++]; 
+        routerToUpdate = new byte[routerIdLen];
+        for(int i = 0; i<routerIdLen;i++){
+            routerToUpdate[i] = data[index++];
+        }
+
+
+        if(data[index++]!=UPDATED_VAL)
+            return null;
+        index++; // can safely skip update val length, we know it is 1
+        update = new byte[1];
+        update[0] =  data[index++];
+        
+        if(data[index++] != DESTINATION_ID)
+            return null;
+        int destinationLenght = data[index++];
         destination = new byte[destinationLenght];
         for(int i = 0;i<destinationLenght;i++){
-            destination[i] = data[i+index];
+            destination[i] = data[index++];
         }
-        index+=destinationLenght;
 
-        int sourceLenght = 8+destinationLenght+1; // we know destination starts at 8, add the dest length to get to the next header, add one to skip header type (we know it will be SOURCE_ID)
+        if(data[index++] != SOURCE_ID)
+            return null;
+        int sourceLen = data[index++];
+        source = new byte[sourceLen];
+        for(int i = 0; i<sourceLen;i++){
+            source[i] = data[index++];
+        }
 
+        if(data[index++] != PACKET_TYPE)
+            return null;
+        packetType = new byte[1];
+        packetType[0] = data[++index]; // skipping len byte, we know it is 1
 
-        
+        ret[0] = routerToUpdate;
+        ret[1] = update;
+        ret[2] = destination;
+        ret[3] = source;
+        ret[4] = packetType;
 
         return ret;
     }
