@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 public class Router {
-    private static int id;
+    private static String id;
     final static int MTU = 1500;
     final static int FS_PORT = 51510;
 
@@ -15,7 +15,7 @@ public class Router {
     public static void main(String[] args) throws SocketException {
         
         socket = new DatagramSocket();
-        id = Integer.parseInt(args[0]);
+        id = args[0];
         System.out.println("Hello from Router "+id);
         RouterThread thread = new RouterThread();
         thread.start();
