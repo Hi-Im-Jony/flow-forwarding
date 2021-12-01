@@ -6,9 +6,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class Node {
-    // head types
-    final static int COMBINATION = 0;
-    final static int DESTINATION = 1;
+    // header types
+    final static int CONTROLLER_REPLY = 0; // packet is a reply from the controller
+    final static int COMBINATION = 1; // header type is a combo of other various types
+    final static int DESTINATION = 2; // end node packet is being sent to
+    final static int SOURCE = 3; // source of packet
+    final static int UPDATE = 4; // always length 2, first value is id of router to change, second value is updated data
 
     // Datagram stuff
     final static int MTU = 1500;
