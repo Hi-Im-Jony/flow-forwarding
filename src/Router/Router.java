@@ -30,14 +30,16 @@ public class Router {
 
     static DatagramSocket socket;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        
         
         socket = new DatagramSocket(ROUTER_PORT);
         id = args[0];
         System.out.println("Hello from Router "+id);
-
+        Thread.sleep(2000);
         // hard coding a test for FS
-        byte[] packet = new byte[0];
+        byte[] packet = new byte[MTU];
 
         int index = 0;
         packet[index++] = PACKET_HEADER;
