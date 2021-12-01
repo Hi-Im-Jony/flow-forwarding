@@ -22,7 +22,7 @@ public class ForwardingService  {
             final static int SOURCE_ID = 8; // ID of initial source
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
 
-    private static HashMap<String, Integer> forwardingTable;
+    private static HashMap<String, byte[]> forwardingTable;
     private static DatagramSocket socket;
     final static int MTU = 1500;
     public static void main(String[] args) throws SocketException {
@@ -34,11 +34,17 @@ public class ForwardingService  {
     }
 
     private static void forward(byte[] data, String dest) throws IOException{
-        if(forwardingTable.containsKey(dest))
-            send(data, forwardingTable.get(dest));
+        if(forwardingTable.containsKey(dest)){
+            InetAddress address = InetAddress.getByAddress(forwardingTable.get(dest));
+            send(data, address, 3);
+        }
         else
             
             contactController(data);
+    }
+
+    private static void update(String router,byte[] address ){
+        forwardingTable.put(router, address);
     }
 
     private static void contactController(byte[] data) throws IOException{
@@ -66,6 +72,7 @@ public class ForwardingService  {
             headerInfo = interpretReply(data);
         else if(headerType==PACKET_HEADER)
             headerInfo = interpretHeader(data);
+
         if(headerInfo == null)
             System.out.println("An error has occured");
             
@@ -170,10 +177,8 @@ public class ForwardingService  {
         return ret;
     }
 
-    public static void send(byte[] data, int dest) throws IOException{
+    public static void send(byte[] data,InetAddress address, int port) throws IOException{
         
-        InetAddress address= InetAddress.getLocalHost();   
-        int port= dest;                       
     
         // create packet addressed to destination
         DatagramPacket packet= new DatagramPacket(data, data.length, address, port);
