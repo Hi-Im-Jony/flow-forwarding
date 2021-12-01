@@ -18,16 +18,19 @@ public class Router {
             final static int DESTINATION_ID = 7; // ID of final destination
             final static int SOURCE_ID = 8; // ID of initial source
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
+    
+    
             
     private static String id;
     final static int MTU = 1500;
+    final static int ROUTER_PORT = 80;
     final static int FS_PORT = 51510;
 
     static DatagramSocket socket;
 
     public static void main(String[] args) throws IOException {
         
-        socket = new DatagramSocket();
+        socket = new DatagramSocket(ROUTER_PORT);
         id = args[0];
         System.out.println("Hello from Router "+id);
 
