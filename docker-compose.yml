@@ -3,7 +3,7 @@ version: "3"
 services:
   router:
     build: src/Router/
-    command: bash -c "java Router.java && java ForwardingService.java"
+    command: bash -c "java Router.java 12 && java ForwardingService.java"
 
   node:
     build: src/Node/
