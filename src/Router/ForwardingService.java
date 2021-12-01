@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.HashMap;
 
 public class ForwardingService  {
@@ -25,31 +24,36 @@ public class ForwardingService  {
     private static HashMap<String, byte[]> forwardingTable;
     private static DatagramSocket socket;
     final static int MTU = 1500;
-    public static void main(String[] args) throws SocketException {
+    final static int ROUTER_PORT = 80;
+    final static int FS_PORT = 51510;
+
+
+    public static void main(String[] args) throws IOException {
         // init
         forwardingTable = new HashMap<>();
-        socket = new DatagramSocket(51510);
+        socket = new DatagramSocket(FS_PORT);
 
         System.out.println("Hello from FS");
+
+        while(true)
+            receive();
     }
 
     private static void forward(byte[] data, String dest) throws IOException{
         if(forwardingTable.containsKey(dest)){
             InetAddress address = InetAddress.getByAddress(forwardingTable.get(dest));
-            send(data, address, 3);
+            send(data, address, ROUTER_PORT);
         }
         else
-            
-            contactController(data);
+            contactController(data, dest);
     }
 
-    private static void update(String router,byte[] address ){
+    private static void update(String router, byte[] address ){
         forwardingTable.put(router, address);
     }
 
-    private static void contactController(byte[] data) throws IOException{
+    private static void contactController(byte[] data, String dest) throws IOException{
         // TODO
-        // contact controller
     }
 
     public static byte[] receive() throws IOException{
@@ -64,27 +68,26 @@ public class ForwardingService  {
 
         System.out.println("Node received: \""+data+",\" from: "+packet.getAddress());
 
-        // TODO extrapolate data
-        byte headerType = data[0];
-
+        // Extract header information
         byte[][] headerInfo = null;
+
+        byte headerType = data[0]; // the first byte will indicate if it is just a normal packet or a reply from controller
         if(headerType == CONTROLLER_REPLY)
             headerInfo = interpretReply(data);
         else if(headerType==PACKET_HEADER)
             headerInfo = interpretHeader(data);
 
-        if(headerInfo == null)
+        if(headerInfo == null){ // should not still be null
             System.out.println("An error has occured");
-            
-
-        String dest = "";
-        forward(data, dest);
+            return null;
+        }
+        
+        forward(data, new String(headerInfo[0]));
         return data;
     }
 
     public static byte[][] interpretReply(byte[] data){
-        // TODO
-        byte[][] ret = new byte[5][];
+        byte[][] ret = new byte[3][];
         byte[] routerToUpdate, update, destination, source, packetType;
         int index = 0;
         if(data[index+=2]!=CONTROLLER_REPLY) // skip len, irrelevant
@@ -133,11 +136,12 @@ public class ForwardingService  {
         packetType = new byte[1];
         packetType[0] = data[index]; 
 
-        ret[0] = routerToUpdate;
-        ret[1] = update;
-        ret[2] = destination;
-        ret[3] = source;
-        ret[4] = packetType;
+        
+        ret[0] = destination;
+        ret[1] = source;
+        ret[2] = packetType;
+
+        update(new String(routerToUpdate), update);
 
         return ret;
     }
