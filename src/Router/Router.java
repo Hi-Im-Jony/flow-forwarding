@@ -67,6 +67,7 @@ public class Router {
         for(int i = 0; i<pB.length; i++)
             packet[index++] = pB[i];
 
+        System.out.println("Sending to FS");
         send(packet, InetAddress.getLocalHost(), FS_PORT);
     }
 
