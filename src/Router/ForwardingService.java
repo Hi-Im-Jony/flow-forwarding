@@ -21,17 +21,21 @@ public class ForwardingService  {
             final static int SOURCE_ID = 8; // ID of initial source
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
 
-    private static HashMap<String, byte[]> forwardingTable;
-    private static DatagramSocket socket;
+    
     final static int MTU = 1500;
     final static int ROUTER_PORT = 80;
     final static int FS_PORT = 51510;
 
+    private static HashMap<String, byte[]> forwardingTable;
+    private static DatagramSocket socket;
+    private static String routerID; // ID of parent router
 
     public static void main(String[] args) throws IOException {
         // init
         forwardingTable = new HashMap<>();
         socket = new DatagramSocket(FS_PORT);
+
+        routerID = args[0];
 
         System.out.println("Hello from FS");
 
@@ -56,7 +60,7 @@ public class ForwardingService  {
         // TODO
     }
 
-    public static byte[] receive() throws IOException{
+    public static void receive() throws IOException{
             
         byte[] data= new byte[MTU];
         DatagramPacket packet= new DatagramPacket(data, data.length);
@@ -79,11 +83,53 @@ public class ForwardingService  {
 
         if(headerInfo == null){ // should not still be null
             System.out.println("An error has occured");
-            return null;
+            return;
         }
+        // check if dest is of format "tcd.scss"
+        String dest = new String(headerInfo[0]);
+        String[] dests = dest.split(".");
         
-        forward(data, new String(headerInfo[0]));
-        return data;
+
+        String prefix = dests[0]; // next hop
+        if(prefix.equals(routerID)){ // we can drop the prefix
+            // drop prefix
+            dest = "";
+            for(int i = 1; i<dests.length;i++){
+                dest = dest+dests[i]+".";
+            }
+            dest = dest.substring(0,dest.length()-1); // remove last "."
+
+            byte[] destInBytes = dest.getBytes();
+
+            // redo header to change dest field
+            int newHeaderLen = 2+(2+destInBytes.length+2+headerInfo[1].length+2+headerInfo[2].length);
+            byte[] newHeader = new byte[newHeaderLen];
+            int index = 0;
+            newHeader[index++] = PACKET_HEADER;
+            newHeader[index++] = (byte) (newHeaderLen-2);
+
+            newHeader[index++] = DESTINATION_ID;
+            newHeader[index++] = (byte) destInBytes.length;
+            for(int i = 0; i<destInBytes.length;i++){
+                newHeader[index++] = destInBytes[i];
+            }
+
+            newHeader[index++] = SOURCE_ID;
+            newHeader[index++] = (byte) headerInfo[1].length;
+            for(int i = 0; i<headerInfo[1].length;i++){
+                newHeader[index++] = headerInfo[1][i];
+            }
+
+            newHeader[index++] = PACKET_HEADER;
+            newHeader[index++] = (byte) headerInfo[2].length;
+            for(int i = 0; i<headerInfo[2].length;i++){
+                newHeader[index++] = headerInfo[2][i];
+            }
+
+        }
+
+        // otherwise, don't drop prefix as it hasn't gotten to destination
+        forward(data, dests[0]);
     }
 
     public static byte[][] interpretReply(byte[] data){
