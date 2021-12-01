@@ -62,16 +62,18 @@ public class ForwardingService  {
     }
 
     public static void receive() throws IOException{
+
+    
             
         byte[] data= new byte[MTU];
         DatagramPacket packet= new DatagramPacket(data, data.length);
-    
+        System.out.println("Receiving...");
         socket.receive(packet);
 
         // extract data from packet
         data= packet.getData();
 
-        System.out.println("Node received: \""+data+",\" from: "+packet.getAddress());
+        System.out.println("FS received: \""+data+",\" from: "+packet.getAddress());
 
         // Extract header information
         byte[][] headerInfo = null;
