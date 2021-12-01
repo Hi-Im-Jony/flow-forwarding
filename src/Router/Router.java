@@ -6,17 +6,18 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 public class Router {
-    // header types
-    final static int CONTROLLER_REPLY = 0; // packet is a reply from the controller
+    final static int CONTROLLER_REPLY = 0; // wraps header to signify packet is a reply from Controller
         final static int UPDATE = 1; // always length 2, first value is id of router to change, second value is updated data
+            final static int ROUTER_ID = 2; // ID of router that will be updated
+            final static int UPDATED_VAL = 3; // value to update to
     
-    final static int FS_REQUEST = 2;
-        final static int REQUESTOR_ID = 3;
+    final static int FS_REQUEST = 4; // wraps header to signify that packet is a request from a Forwarding Service
+        final static int REQUESTOR_ID = 5; // ID of FS
 
-        final static int PACKET_HEADER = 4; // header that wraps around multiple header items
-            final static int DESTINATION_ID = 5; // end node packet is being sent to
-            final static int SOURCE_ID = 6; // source of packet
-            final static int PACKET_TYPE = 7; // type of packet (ie, SMS, Image, blah blah)
+        final static int PACKET_HEADER = 6; // wraps packets header info
+            final static int DESTINATION_ID = 7; // ID of final destination
+            final static int SOURCE_ID = 8; // ID of initial source
+            final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
             
     private static String id;
     final static int MTU = 1500;
