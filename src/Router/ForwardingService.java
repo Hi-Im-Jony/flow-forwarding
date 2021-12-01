@@ -119,10 +119,10 @@ public class ForwardingService  {
             source[i] = data[index++];
         }
 
-        if(data[index++] != PACKET_TYPE)
+        if(data[index+=2] != PACKET_TYPE) // skip len, irrelevant
             return null;
         packetType = new byte[1];
-        packetType[0] = data[++index]; // skipping len byte, we know it is 1
+        packetType[0] = data[index]; 
 
         ret[0] = routerToUpdate;
         ret[1] = update;
@@ -134,9 +134,40 @@ public class ForwardingService  {
     }
 
     public static byte[][] interpretHeader(byte[] data){
-        
+        byte[][] ret = new byte[3][];
+        byte[] destination, source, packetType;
 
-        return null;
+        int index = 0;
+
+        if(data[index+=2] != PACKET_HEADER) // skip len, irrelevant
+            return null;
+        
+        if(data[index++] != DESTINATION_ID)
+            return null;
+        int destinationLenght = data[index++];
+        destination = new byte[destinationLenght];
+        for(int i = 0;i<destinationLenght;i++){
+            destination[i] = data[index++];
+        }
+
+        if(data[index++] != SOURCE_ID)
+            return null;
+        int sourceLen = data[index++];
+        source = new byte[sourceLen];
+        for(int i = 0; i<sourceLen;i++){
+            source[i] = data[index++];
+        }
+
+        if(data[index+=2] != PACKET_TYPE) // skip len, irrelevant
+            return null;
+        packetType = new byte[1];
+        packetType[0] = data[index]; 
+
+        ret[0] = destination;
+        ret[1] = source;
+        ret[3] = packetType;
+
+        return ret;
     }
 
     public static void send(byte[] data, int dest) throws IOException{
