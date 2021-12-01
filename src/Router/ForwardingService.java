@@ -10,13 +10,15 @@ import java.util.HashMap;
 public class ForwardingService  {
     // header types
     final static int CONTROLLER_REPLY = 0; // packet is a reply from the controller
-    final static int COMBINATION = 1; // header type is a combo of other various types
-    final static int DESTINATION_ID = 2; // end node packet is being sent to
-    final static int SOURCE_ID = 3; // source of packet
-    final static int UPDATE = 4; // always length 2, first value is id of router to change, second value is updated data
-
-
+        final static int UPDATE = 1; // always length 2, first value is id of router to change, second value is updated data
     
+    final static int FS_REQUEST = 2;
+        final static int REQUESTOR_ID = 3;
+
+        final static int MULTI_H = 3; // header that wraps around multiple header items
+            final static int DESTINATION_ID = 4; // end node packet is being sent to
+            final static int SOURCE_ID = 5; // source of packet
+            final static int PACKET_TYPE = 6; // type of packet (ie, SMS, Image, blah blah)
     
     private static HashMap<String, Integer> forwardingTable;
     private static DatagramSocket socket;
@@ -57,10 +59,26 @@ public class ForwardingService  {
         System.out.println("Node received: \""+data+",\" from: "+packet.getAddress());
 
         // TODO extrapolate data
+        byte headerType = data[0];
+
+        if(headerType == CONTROLLER_REPLY)
+            interpretReply(data);
+        else if(headerType==MULTI_H)
+            interpetHeader(data);
+
+            
 
         int dest = 0;
         forward(data, dest);
         return data;
+    }
+
+    public static void interpretReply(byte[] data){
+        // TODO
+    }
+
+    public static void interpetHeader(byte[] data){
+        // TODO
     }
 
     public static void send(byte[] data, int dest) throws IOException{
