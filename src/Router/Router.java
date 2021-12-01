@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 public class Router {
+    // header types
     final static int CONTROLLER_REPLY = 0; // wraps header to signify packet is a reply from Controller
         final static int UPDATE = 1; // always length 2, first value is id of router to change, second value is updated data
             final static int ROUTER_ID = 2; // ID of router that will be updated
@@ -18,6 +19,7 @@ public class Router {
             final static int DESTINATION_ID = 7; // ID of final destination
             final static int SOURCE_ID = 8; // ID of initial source
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
+            final static int PACKET = 10; // the actual packet
     
     
             
@@ -35,6 +37,35 @@ public class Router {
         System.out.println("Hello from Router "+id);
 
         // hard coding a test for FS
+        byte[] packet = new byte[0];
+
+        int index = 0;
+        packet[index++] = PACKET_HEADER;
+        packet[index++] = 0;
+
+        packet[index++] = DESTINATION_ID;
+        String s = "trinity";
+        byte[] sB = s.getBytes();
+        packet[index++] = (byte) sB.length;
+        for(int i = 0; i<sB.length; i++)
+            packet[index++] = sB[i];
+
+        packet[index++] = SOURCE_ID;
+        packet[index++] = 1;
+        packet[index++] = 69;
+
+        packet[index++] = PACKET_TYPE;
+        packet[index++] = 1;
+        packet[index++] = 1;
+
+        packet[index++] = PACKET;
+        String p = "TESTING FS";
+        byte[] pB = p.getBytes();
+        packet[index++] = (byte) pB.length;
+        for(int i = 0; i<pB.length; i++)
+            packet[index++] = pB[i];
+
+        send(packet, InetAddress.getLocalHost(), FS_PORT);
     }
 
     public static byte[] receive() throws IOException{
