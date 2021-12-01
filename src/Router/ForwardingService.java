@@ -103,9 +103,11 @@ public class ForwardingService  {
 
         if(data[index++]!=UPDATED_VAL)
             return null;
-        index++; // can safely skip update val length, we know it is 1
-        update = new byte[1];
-        update[0] =  data[index++];
+        int updateLen = data[index++];
+        update = new byte[updateLen];
+        for(int i = 0; i<updateLen;i++){
+            update[i] =  data[index++];
+        }
         
         if(data[index+=2] != PACKET_HEADER) // skip len, irrelevant
             return null;
