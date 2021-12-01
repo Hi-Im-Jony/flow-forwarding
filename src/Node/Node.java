@@ -21,7 +21,7 @@ public class Node {
             
     // Datagram stuff
     final static int MTU = 1500;
-    final static int NODE_PORT = 1;
+    final static int NODE_PORT = 40;
     static DatagramSocket NodeSocket;
 
     private static class App extends Thread{
