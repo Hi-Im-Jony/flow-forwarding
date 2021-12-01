@@ -34,9 +34,7 @@ public class Router {
         id = args[0];
         System.out.println("Hello from Router "+id);
 
-        while(true){
-            receive();
-        }
+        // hard coding a test for FS
     }
 
     public static byte[] receive() throws IOException{
