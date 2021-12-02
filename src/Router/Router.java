@@ -37,7 +37,7 @@ public class Router {
         socket = new DatagramSocket(ROUTER_PORT);
         id = args[0];
         System.out.println("Hello from Router "+id);
-        Thread.sleep(2000);
+        
         // hard coding a test for FS
         byte[] packet = new byte[MTU];
 
@@ -67,8 +67,13 @@ public class Router {
         for(int i = 0; i<pB.length; i++)
             packet[index++] = pB[i];
 
-        System.out.println("Sending to FS");
-        send(packet, InetAddress.getLocalHost(), FS_PORT);
+        
+        
+        while(true){
+            Thread.sleep(2000);
+            System.out.println("Sending to FS");
+            send(packet, InetAddress.getLocalHost(), FS_PORT);
+        }
     }
 
     public static byte[] receive() throws IOException{
