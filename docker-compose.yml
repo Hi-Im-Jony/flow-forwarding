@@ -17,29 +17,29 @@ services:
     build: src/ForwardingService
     command: java ForwardingService.java trinity
 
-  2-router:
-    build: src/Router/
-    command: java Router.java scss trinity
-    links:
-      - "2-forwarding-service:fs"
-    depends_on:
-      - controller
+  # 2-router:
+  #   build: src/Router/
+  #   command: java Router.java scss trinity
+  #   links:
+  #     - "2-forwarding-service:fs"
+  #   depends_on:
+  #     - controller
 
-  2-forwarding-service:
-    build: src/ForwardingService
-    command: java ForwardingService.java scss
+  # 2-forwarding-service:
+  #   build: src/ForwardingService
+  #   command: java ForwardingService.java scss
 
-  3-router:
-    build: src/Router/
-    command: java Router.java Jonathan trinity
-    links:
-      - "3-forwarding-service:fs"
-    depends_on:
-      - controller
+  # 3-router:
+  #   build: src/Router/
+  #   command: java Router.java Jonathan trinity
+  #   links:
+  #     - "3-forwarding-service:fs"
+  #   depends_on:
+  #     - controller
 
-  3-forwarding-service:
-    build: src/ForwardingService
-    command: java ForwardingService.java Jonathan
+  # 3-forwarding-service:
+  #   build: src/ForwardingService
+  #   command: java ForwardingService.java Jonathan
 
   tcpdump:
     image: kaazing/tcpdump
