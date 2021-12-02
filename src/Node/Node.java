@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class Node {
+    // header types
     final static int CONTROLLER_REPLY = 0; // wraps header to signify packet is a reply from Controller
         final static int UPDATE = 1; // always length 2, first value is id of router to change, second value is updated data
             final static int ROUTER_ID = 2; // ID of router that will be updated
@@ -18,7 +19,17 @@ public class Node {
             final static int DESTINATION_ID = 7; // ID of final destination
             final static int SOURCE_ID = 8; // ID of initial source
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
-            
+            final static int PACKET = 10; // the actual packet
+
+    final static int CONNECTION_REQUEST = 11; // request from router to connect to another router / make presence known
+        // REQUESTOR_ID must be included;
+        final static int CONNECT_TO = 12; // router to connect to
+    
+    final static int APP_ALERT = 13; // an alert from an App to a FS that it wants to receive stuff
+        // REQUESTOR_ID must be included;
+        final static int STRING = 14; // string to associate with app
+
+        
     // Datagram stuff
     static DatagramSocket NodeSocket;
 

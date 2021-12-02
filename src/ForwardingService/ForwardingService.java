@@ -22,6 +22,15 @@ public class ForwardingService  {
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
             final static int PACKET = 10; // the actual packet
 
+    final static int CONNECTION_REQUEST = 11; // request from router to connect to another router / make presence known
+        // REQUESTOR_ID must be included;
+        final static int CONNECT_TO = 12; // router to connect to
+    
+    final static int APP_ALERT = 13; // an alert from an App to a FS that it wants to receive stuff
+        // REQUESTOR_ID must be included;
+        final static int STRING = 14; // string to associate with app
+
+
     
     final static int MTU = 1500;
     final static int ROUTER_PORT = 80;
@@ -151,19 +160,19 @@ public class ForwardingService  {
         byte[][] ret = new byte[4][];
         byte[] routerToUpdate, update, destination, source, packetType, packet;
         int index = 0;
-        if(data[index++]!=CONTROLLER_REPLY) // skip len, irrelevant
+        if(data[index++]!=CONTROLLER_REPLY) 
         {
             System.out.println("Error 1");
             return null;
         }
-        index++;
+        index++; // skip len, irrelevant
         
-        if(data[index++]!=UPDATE) // skip len, irrelevant
+        if(data[index++]!=UPDATE) 
         {
             System.out.println("Error 2");
             return null;
         }
-        index++;
+        index++; // skip len, irrelevant
         
         if(data[index++]!=ROUTER_ID)
         {
@@ -187,12 +196,12 @@ public class ForwardingService  {
             update[i] =  data[index++];
         }
         
-        if(data[index++] != PACKET_HEADER) // skip len, irrelevant
+        if(data[index++] != PACKET_HEADER)
         {
             System.out.println("Error 5");
             return null;
         }
-        index++;
+        index++; // skip len, irrelevant
         
         if(data[index++] != DESTINATION_ID)
         {
@@ -216,12 +225,12 @@ public class ForwardingService  {
             source[i] = data[index++];
         }
 
-        if(data[index++] != PACKET_TYPE) // skip len, irrelevant
+        if(data[index++] != PACKET_TYPE) 
         {
             System.out.println("Error 8");
             return null;
         }
-        index++;
+        index++; // skip len, irrelevant
         packetType = new byte[1];
         packetType[0] = data[index++]; 
 
@@ -253,13 +262,13 @@ public class ForwardingService  {
 
         int index = 0;
         int checker =  0;
-        if( data[index++] != (byte) PACKET_HEADER) // skip len, irrelevant
+        if( data[index++] != (byte) PACKET_HEADER) 
         {
             System.out.println("Error 10: index  is: "+index);
             System.out.println("Error 10: checker is: "+checker);
             return null;
         }
-        index++;
+        index++; // skip len, irrelevant
         if(data[index++] != DESTINATION_ID)
         {
             System.out.println("Error 11");
@@ -282,12 +291,12 @@ public class ForwardingService  {
             source[i] = data[index++];
         }
 
-        if(data[index++] != PACKET_TYPE) // skip len, irrelevant
+        if(data[index++] != PACKET_TYPE) 
         {
             System.out.println("Error 13");
             return null;
         }
-        index++;
+        index++; // skip len, irrelevant
         packetType = new byte[1];
         packetType[0] = data[index++]; 
 

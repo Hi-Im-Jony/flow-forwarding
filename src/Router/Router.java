@@ -19,6 +19,15 @@ public class Router {
             final static int SOURCE_ID = 8; // ID of initial source
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
             final static int PACKET = 10; // the actual packet
+
+    final static int CONNECTION_REQUEST = 11; // request from router to connect to another router / make presence known
+        // REQUESTOR_ID must be included;
+        final static int CONNECT_TO = 12; // router to connect to
+    
+    final static int APP_ALERT = 13; // an alert from an App to a FS that it wants to receive stuff
+        // REQUESTOR_ID must be included;
+        final static int STRING = 14; // string to associate with app
+    
     
     
             
@@ -37,39 +46,40 @@ public class Router {
         id = args[0];
         System.out.println("Hello from Router "+id);
         
-        // // hard coding a test for FS
-        // byte[] packet = new byte[MTU];
+        // hard coding a test for FS
+        byte[] packet = new byte[MTU];
 
-        // int index = 0;
-        // packet[index++] = PACKET_HEADER;
-        // packet[index++] = 0;
+        int index = 0;
+        packet[index++] = PACKET_HEADER;
+        packet[index++] = 0;
 
-        // packet[index++] = DESTINATION_ID;
-        // String s = "trinity";
-        // byte[] sB = s.getBytes();
-        // packet[index++] = (byte) sB.length;
-        // for(int i = 0; i<sB.length; i++)
-        //     packet[index++] = sB[i];
+        packet[index++] = DESTINATION_ID;
+        String s = "trinity";
+        byte[] sB = s.getBytes();
+        packet[index++] = (byte) sB.length;
+        for(int i = 0; i<sB.length; i++)
+            packet[index++] = sB[i];
 
-        // packet[index++] = SOURCE_ID;
-        // packet[index++] = 1;
-        // packet[index++] = 69;
+        packet[index++] = SOURCE_ID;
+        packet[index++] = 1;
+        packet[index++] = 69;
 
-        // packet[index++] = PACKET_TYPE;
-        // packet[index++] = 1;
-        // packet[index++] = 1;
+        packet[index++] = PACKET_TYPE;
+        packet[index++] = 1;
+        packet[index++] = 1;
 
-        // packet[index++] = PACKET;
-        // String p = "TESTING FS";
-        // byte[] pB = p.getBytes();
-        // packet[index++] = (byte) pB.length;
-        // for(int i = 0; i<pB.length; i++)
-        //     packet[index++] = pB[i];
+        packet[index++] = PACKET;
+        String p = "TESTING FS";
+        byte[] pB = p.getBytes();
+        packet[index++] = (byte) pB.length;
+        for(int i = 0; i<pB.length; i++)
+            packet[index++] = pB[i];
 
         
         
         while(true){
-            receive();
+            send(packet, InetAddress.getByName("fs"), FS_PORT);
+            Thread.sleep(2000);
         }
     }
 
@@ -90,11 +100,8 @@ public class Router {
         return data;
     }
 
-    public static void send(byte[] data, InetAddress address, int dest) throws IOException{
+    public static void send(byte[] data, InetAddress address, int port) throws IOException{
         
-        // InetAddress address= InetAddress.getLocalHost();   
-        int port= dest;                       
-    
         // create packet addressed to destination
         DatagramPacket packet= new DatagramPacket(data, data.length, address, port);
         socket.send(packet);
