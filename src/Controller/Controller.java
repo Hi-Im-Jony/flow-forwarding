@@ -16,6 +16,7 @@ public class Controller {
     
     final static int FS_REQUEST = 4; // wraps header to signify that packet is a request from a Forwarding Service
         final static int QUERY = 5; // name of router we are asking about
+        // include REQUESTOR_NAME (declared further below)
         
         final static int PACKET_HEADER = 6; // wraps packets header info
             final static int DESTINATION_ID = 7; // ID of final destination
@@ -64,6 +65,7 @@ public class Controller {
         if(data[index++]!=FS_REQUEST)
             return;
         index++; // can skip L bit
+
         if(data[index++]!= QUERY)
             return;
         int queryLen = data[index++];
@@ -72,9 +74,55 @@ public class Controller {
             queryB[i] = data[index++];
         String query= new String(queryB);
 
-        if(addresses.containsKey(query))
-            System.out.println("Address found");
-        else System.out.println("Address not fouund");
+        if(data[index++] != REQUESTOR_NAME)
+            return;
+        int reqLen = data[index++];
+        byte[] reqB = new byte[reqLen];
+        for(int i = 0; i< reqB.length;i++){
+            reqB[i] = data[index++];
+        }
+        String requestor = new String(reqB);
+
+        System.out.println("Requestor router: "+requestor);
+
+        String next = findNext(requestor,query);
+        if(next == null)
+            return; 
+
+        // create reply
+        byte[] reply = new byte[2+(2+(2+query.length())+(2+next.length())+data.length-index-1)];
+        int replyIndex = 0;
+        reply[replyIndex++] = CONTROLLER_REPLY;
+        reply[replyIndex++] = 0;
+
+        reply[replyIndex++] = UPDATE;
+        reply[replyIndex++] = 0;
+
+        reply[replyIndex++] = ROUTER_ID;
+        reply[replyIndex++] = (byte) query.length();
+        for(int i = 0; i< queryB.length;i++)
+            reply[index++] = queryB[i];
+        
+        reply[replyIndex++] = UPDATED_VAL;
+        reply[replyIndex++] = (byte) next.length();
+        byte[] nextB = next.getBytes();
+        for(int i = 0; i<nextB.length;i++){
+            reply[replyIndex++] =nextB[i];
+        }
+
+        // copy rest of data into reply
+        System.out.println(data[index]==PACKET_HEADER);
+        for(int i = index; i<data.length;i++){
+            reply[replyIndex++] = data[i];
+        }
+
+
+
+    }
+
+    private static String findNext(String start, String end){
+        // TODO
+        return null;
     }
 
     private static void connect(byte[] data, InetAddress reqAddress){
