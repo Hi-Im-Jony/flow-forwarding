@@ -13,21 +13,21 @@ public class Router {
             final static int UPDATED_VAL = 3; // value to update to
     
     final static int FS_REQUEST = 4; // wraps header to signify that packet is a request from a Forwarding Service
-        final static int REQUESTOR_ID = 5; // ID of FS
-
+        final static int QUERY = 5; // name of router we are asking about
+        
         final static int PACKET_HEADER = 6; // wraps packets header info
             final static int DESTINATION_ID = 7; // ID of final destination
-            final static int SOURCE_ID = 8; // ID of initial source
-            final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
-            final static int PACKET = 10; // the actual packet
+            final static int SOURCE_ID = 9; // ID of initial source
+            final static int PACKET_TYPE = 10; // Type of packet being transmitted (irrelevant for assignment but need irl)
+            final static int PACKET = 11; // the actual packet
 
-    final static int CONNECTION_REQUEST = 11; // request from router to connect to another router / make presence known
-        // REQUESTOR_ID must be included;
-        final static int CONNECT_TO = 12; // router to connect to
+    final static int CONNECTION_REQUEST = 12; // request from router to connect to another router / make presence known
+        final static int REQUESTOR_NAME = 13; // ID of FS
+        final static int CONNECT_TO = 14; // router to connect to
     
-    final static int APP_ALERT = 13; // an alert from an App to a FS that it wants to receive stuff
-        // REQUESTOR_ID must be included;
-        final static int STRING = 14; // string to associate with app
+    final static int APP_ALERT = 15; // an alert from an App to a FS that it wants to receive stuff
+        // REQUESTOR_NAME must be included;
+        final static int STRING = 16; // string to associate with app
     
     
     
@@ -76,7 +76,7 @@ public class Router {
         System.out.println("Connections to request: "+ connectionHeaders.size());
         connectionRequest[index++] =  (byte) (connectionHeaders.size());
 
-        connectionRequest[index++] = REQUESTOR_ID;
+        connectionRequest[index++] = REQUESTOR_NAME;
         connectionRequest[index++] = (byte) nameInBytes.length;
         for(int i = 0; i<nameInBytes.length;i++)
             connectionRequest[index++] = nameInBytes[i];

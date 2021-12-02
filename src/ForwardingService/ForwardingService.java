@@ -14,21 +14,21 @@ public class ForwardingService  {
             final static int UPDATED_VAL = 3; // value to update to
     
     final static int FS_REQUEST = 4; // wraps header to signify that packet is a request from a Forwarding Service
-        final static int REQUESTOR_ID = 5; // ID of FS
-
+        final static int QUERY = 5; // name of router we are asking about
+        
         final static int PACKET_HEADER = 6; // wraps packets header info
             final static int DESTINATION_ID = 7; // ID of final destination
-            final static int SOURCE_ID = 8; // ID of initial source
-            final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
-            final static int PACKET = 10; // the actual packet
+            final static int SOURCE_ID = 9; // ID of initial source
+            final static int PACKET_TYPE = 10; // Type of packet being transmitted (irrelevant for assignment but need irl)
+            final static int PACKET = 11; // the actual packet
 
-    final static int CONNECTION_REQUEST = 11; // request from router to connect to another router / make presence known
-        // REQUESTOR_ID must be included;
-        final static int CONNECT_TO = 12; // router to connect to
+    final static int CONNECTION_REQUEST = 12; // request from router to connect to another router / make presence known
+        final static int REQUESTOR_NAME = 13; // ID of FS
+        final static int CONNECT_TO = 14; // router to connect to
     
-    final static int APP_ALERT = 13; // an alert from an App to a FS that it wants to receive stuff
-        // REQUESTOR_ID must be included;
-        final static int STRING = 14; // string to associate with app
+    final static int APP_ALERT = 15; // an alert from an App to a FS that it wants to receive stuff
+        // REQUESTOR_NAME must be included;
+        final static int STRING = 16; // string to associate with app
 
 
     
@@ -68,23 +68,42 @@ public class ForwardingService  {
     }
 
     private static void contactController(byte[] data, String dest) throws IOException{
-        System.out.println("Contacting controller about: "+dest);
-        // TODO
+        //System.out.println("Contacting controller about: "+dest);
+        // check dest format
+        String[] dests = dest.split(".");
+        if(dests.length>0)
+            dest = dests[0]; // only interested in next "hop"
+
+        int index = 0;
+        byte[] fsRequest = new byte[2+(2+dest.length()+data.length)];
+
+        fsRequest[index++] = FS_REQUEST;
+        fsRequest[index++] = 1;
+
+        fsRequest[index++] = QUERY;
+        fsRequest[index++]= (byte) dest.length();
+        byte[] destB = dest.getBytes();
+        for(int i = 0; i<destB.length;i++)
+            fsRequest[index++] = destB[i];
+        
+        // add rest of data
+        for(int i = 0; i<data.length;i++)
+            fsRequest[index++] = data[i];
+
+        send(fsRequest, InetAddress.getByName("controller"), 42);
     }
 
     public static void receive() throws IOException{
-
-    
             
         byte[] data= new byte[MTU];
         DatagramPacket packet= new DatagramPacket(data, data.length);
-        System.out.println("Receiving...");
+        // System.out.println("Receiving...");
         socket.receive(packet);
 
         // extract data from packet
         data= packet.getData();
 
-        System.out.println("FS received: \""+data+",\" from: "+packet.getAddress());
+         System.out.println("FS received: \""+new String(data)+",\" from: "+packet.getAddress());
 
         // Extract header information
         byte[][] headerInfo = null;
@@ -105,7 +124,7 @@ public class ForwardingService  {
         String[] dests = dest.split(".");
         
 
-        if(dests.length>0){
+        if(dests.length>1){
             String prefix = dests[0]; // next hop
             if(prefix.equals(routerID)){ // we can drop the prefix
                 // drop prefix
