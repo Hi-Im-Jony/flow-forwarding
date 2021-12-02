@@ -20,9 +20,11 @@ public class Node {
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
             
     // Datagram stuff
+    static DatagramSocket NodeSocket;
+
     final static int MTU = 1500;
     final static int NODE_PORT = 40;
-    static DatagramSocket NodeSocket;
+    final static int FS_PORT = 51510;
 
     private static class App extends Thread{
         DatagramSocket AppSocket;
