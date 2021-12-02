@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Controller {
@@ -30,7 +31,9 @@ public class Controller {
         // REQUESTOR_ID must be included;
         final static int STRING = 14; // string to associate with app
         
-
+    
+    private static HashMap<String, ArrayList<String>> connections;    
+    
     static DatagramSocket socket;
     
     final static int MTU = 1500;
@@ -58,7 +61,42 @@ public class Controller {
     }
 
     private static void connect(byte[] data){
+        System.out.println("Attempting to connect a router");
 
+        int index = 0;
+        if(data[index++]!=CONNECTION_REQUEST)
+            return;
+
+        int numOfConnections = data[index++];
+
+        if(data[index++]!=REQUESTOR_ID)
+            return;
+        int requestorLen = data[index++];
+        byte[] requestor = new byte[requestorLen];
+        for(int i = 0;i<requestorLen;i++){
+            requestor[i] = data[index++];
+        }
+        
+        System.out.println("Identified requestor as:" + new String(requestor));
+        // prepare to add connections
+        ArrayList<String> routersConnections = connections.get(new String(requestor));
+        if(routersConnections==null)
+            routersConnections = new ArrayList<>();
+
+        for(int i = 0; i<numOfConnections;i++){
+            if(data[index++] != CONNECT_TO)
+                return;
+            int nameLen = data[index++];
+            byte[] name = new byte[nameLen] ;
+            for(int j = 0; j<nameLen;j++)
+                name[i] = data[index++];
+            
+            String connection = new String(name);
+            routersConnections.add(connection);
+            
+        }
+        System.out.println("Connections made");
+        connections.put(new String(requestor), routersConnections);
     }
 
     private static void receive() throws IOException{
@@ -80,8 +118,6 @@ public class Controller {
             executeFsRequest(data);
         else if(dataType==CONNECTION_REQUEST)
             connect(data);
-            
-        
     }
     private static void send(byte[] data, InetAddress address, int port) throws IOException{
         
