@@ -71,7 +71,7 @@ public class Router {
         while(true){
             Thread.sleep(2000);
             System.out.println("Sending to FS");
-            send(packet, InetAddress.getByName("forwarding-service"), FS_PORT);
+            send(packet, InetAddress.getByName("fs"), FS_PORT);
         }
     }
 

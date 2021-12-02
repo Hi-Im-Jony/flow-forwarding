@@ -1,17 +1,33 @@
 version: "3"
 
 services:
-  router:
+  1-router:
     build: src/Router/
     command: java Router.java gold
+    links:
+      - "1-forwarding-service:fs"
     networks:
       - m1
 
-  forwarding-service:
+  1-forwarding-service:
     build: src/ForwardingService
     command: java ForwardingService.java gold
     networks:
       - m1
+
+  2-router:
+    build: src/Router/
+    command: java Router.java gold
+    links:
+      - "2-forwarding-service:fs"
+    networks:
+      - m2
+
+  2-forwarding-service:
+    build: src/ForwardingService
+    command: java ForwardingService.java gold
+    networks:
+      - m2
 
   tcpdump:
     image: kaazing/tcpdump
@@ -21,3 +37,4 @@ services:
 
 networks:
   m1:
+  m2:
