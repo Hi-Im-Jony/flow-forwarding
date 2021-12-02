@@ -4,32 +4,33 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 public class ForwardingService  {
-    // header types
-    final static int CONTROLLER_REPLY = 0; // wraps header to signify packet is a reply from Controller
-        final static int UPDATE = 1; // always length 2, first value is id of router to change, second value is updated data
-            final static int ROUTER_ID = 2; // ID of router that will be updated
-            final static int UPDATED_VAL = 3; // value to update to
+   // header types
+    final static int CONTROLLER_REPLY = -1; // wraps header to signify packet is a reply from Controller
+        final static int UPDATE = -2; // always length 2, first value is id of router to change, second value is updated data
+            final static int ROUTER_ID = -3; // ID of router that will be updated
+            final static int UPDATED_VAL = -4; // value to update to
     
-    final static int FS_REQUEST = 4; // wraps header to signify that packet is a request from a Forwarding Service
-        final static int QUERY = 5; // name of router we are asking about
+    final static int FS_REQUEST = -5; // wraps header to signify that packet is a request from a Forwarding Service
+        final static int QUERY = -6; // name of router we are asking about
         // include REQUESTOR_NAME (declared further below)
         
-        final static int PACKET_HEADER = 6; // wraps packets header info
-            final static int DESTINATION_ID = 7; // ID of final destination
-            final static int SOURCE_ID = 9; // ID of initial source
-            final static int PACKET_TYPE = 10; // Type of packet being transmitted (irrelevant for assignment but need irl)
-            final static int PACKET = 11; // the actual packet
+        final static int PACKET_HEADER = -7; // wraps packets header info
+            final static int DESTINATION_ID = -8; // ID of final destination
+            final static int SOURCE_ID = -9; // ID of initial source
+            final static int PACKET_TYPE = -10; // Type of packet being transmitted (irrelevant for assignment but need irl)
+            final static int PACKET = -11; // the actual packet
 
-    final static int CONNECTION_REQUEST = 12; // request from router to connect to another router / make presence known
-        final static int REQUESTOR_NAME = 13; // ID of FS
-        final static int CONNECT_TO = 14; // router to connect to
+    final static int CONNECTION_REQUEST = -12; // request from router to connect to another router / make presence known
+        final static int REQUESTOR_NAME = -13; // ID of FS
+        final static int CONNECT_TO = -14; // router to connect to
     
-    final static int APP_ALERT = 15; // an alert from an App to a FS that it wants to receive stuff
+    final static int APP_ALERT = -15; // an alert from an App to a FS that it wants to receive stuff
         // REQUESTOR_NAME must be included;
-        final static int STRING = 16; // string to associate with app
+        final static int STRING = -16; // string to associate with app
 
 
     
@@ -37,7 +38,7 @@ public class ForwardingService  {
     final static int ROUTER_PORT = 80;
     final static int FS_PORT = 51510;
 
-    private static HashMap<String, byte[]> forwardingTable;
+    private static HashMap<String, InetAddress> forwardingTable;
     private static DatagramSocket socket;
     private static String routerID; // ID of parent router
 
@@ -56,15 +57,17 @@ public class ForwardingService  {
 
     private static void forward(byte[] data, String dest) throws IOException{
         if(forwardingTable.containsKey(dest)){
-            System.out.println("Forwarding:"+new String(data)+", to "+dest);
-            InetAddress address = InetAddress.getByAddress(forwardingTable.get(dest));
+            InetAddress address = forwardingTable.get(dest);
+            System.out.println("Forwarding:"+new String(data)+", to "+address.getHostName());
+            System.out.println("Dest addr is "+ address.toString());
             send(data, address, ROUTER_PORT);
+            System.out.println("Sent...");
         }
         else
             contactController(data, dest);
     }
 
-    private static void update(String router, byte[] address ){
+    private static void update(String router, InetAddress address ){
         forwardingTable.put(router, address);
     }
 
@@ -124,7 +127,7 @@ public class ForwardingService  {
             headerInfo = interpretHeader(data);
 
         if(headerInfo == null){ // should not still be null
-            System.out.println("An error has occured");
+            System.out.println("Header info is empty...");
             return;
         }
 
@@ -142,49 +145,46 @@ public class ForwardingService  {
                     dest = dest+dests[i]+".";
                 }
                 dest = dest.substring(0,dest.length()-1); // remove last "."
-
-                byte[] destInBytes = dest.getBytes();
-
-                // redo header to change dest field
-                int newHeaderLen = 2+(2+destInBytes.length+2+headerInfo[1].length+2+headerInfo[2].length+2+headerInfo[3].length);
-                byte[] newHeader = new byte[newHeaderLen];
-                int index = 0;
-                newHeader[index++] = PACKET_HEADER;
-                newHeader[index++] = (byte) (newHeaderLen-2);
-
-                newHeader[index++] = DESTINATION_ID;
-                newHeader[index++] = (byte) destInBytes.length;
-                for(int i = 0; i<destInBytes.length;i++){
-                    newHeader[index++] = destInBytes[i];
-                }
-
-                newHeader[index++] = SOURCE_ID;
-                newHeader[index++] = (byte) headerInfo[1].length;
-                for(int i = 0; i<headerInfo[1].length;i++){
-                    newHeader[index++] = headerInfo[1][i];
-                }
-
-                newHeader[index++] = PACKET_HEADER;
-                newHeader[index++] = (byte) headerInfo[2].length;
-                for(int i = 0; i<headerInfo[2].length;i++){
-                    newHeader[index++] = headerInfo[2][i];
-                }
-
-                newHeader[index++] = PACKET;
-                newHeader[index++] = (byte) headerInfo[3].length;
-                for(int i = 0; i<headerInfo[3].length; i++){
-                    newHeader[index++] = headerInfo[2][i];
-                }
-                forward(newHeader, dest);
-                return;
             }
 
         }
-        else // don't drop prefix as it hasn't gotten to destination / there is no prefix, so just forward
-            forward(data, dest);
+        byte[] destInBytes = dest.getBytes();
+
+        // redo header to change dest field
+        int newHeaderLen = 2+(2+destInBytes.length+2+headerInfo[1].length+2+headerInfo[2].length+2+headerInfo[3].length);
+        byte[] newHeader = new byte[newHeaderLen];
+        int index = 0;
+        newHeader[index++] = PACKET_HEADER;
+        newHeader[index++] = (byte) (newHeaderLen-2);
+
+        newHeader[index++] = DESTINATION_ID;
+        newHeader[index++] = (byte) destInBytes.length;
+        for(int i = 0; i<destInBytes.length;i++){
+            newHeader[index++] = destInBytes[i];
+        }
+
+        newHeader[index++] = SOURCE_ID;
+        newHeader[index++] = (byte) headerInfo[1].length;
+        for(int i = 0; i<headerInfo[1].length;i++){
+            newHeader[index++] = headerInfo[1][i];
+        }
+
+        newHeader[index++] = PACKET_TYPE;
+        newHeader[index++] = (byte) headerInfo[2].length;
+        for(int i = 0; i<headerInfo[2].length;i++){
+            newHeader[index++] = headerInfo[2][i];
+        }
+
+        newHeader[index++] = PACKET;
+        newHeader[index++] = (byte) headerInfo[3].length;
+        for(int i = 0; i<headerInfo[3].length; i++){
+            newHeader[index++] = headerInfo[3][i];
+        }
+        forward(newHeader, dest);
     }
 
-    public static byte[][] interpretReply(byte[] data){
+    public static byte[][] interpretReply(byte[] data) throws UnknownHostException{
+        System.out.println("Received reply!");
         byte[][] ret = new byte[4][];
         byte[] routerToUpdate, update, destination, source, packetType, packet;
         int index = 0;
@@ -279,7 +279,7 @@ public class ForwardingService  {
         ret[2] = packetType;
         ret[3] = packet;
 
-        update(new String(routerToUpdate), update);
+        update(new String(routerToUpdate), InetAddress.getByAddress(update));
 
         return ret;
     }

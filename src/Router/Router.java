@@ -7,27 +7,28 @@ import java.util.ArrayList;
 
 public class Router {
     // header types
-    final static int CONTROLLER_REPLY = 0; // wraps header to signify packet is a reply from Controller
-        final static int UPDATE = 1; // always length 2, first value is id of router to change, second value is updated data
-            final static int ROUTER_ID = 2; // ID of router that will be updated
-            final static int UPDATED_VAL = 3; // value to update to
+    final static int CONTROLLER_REPLY = -1; // wraps header to signify packet is a reply from Controller
+        final static int UPDATE = -2; // always length 2, first value is id of router to change, second value is updated data
+            final static int ROUTER_ID = -3; // ID of router that will be updated
+            final static int UPDATED_VAL = -4; // value to update to
     
-    final static int FS_REQUEST = 4; // wraps header to signify that packet is a request from a Forwarding Service
-        final static int QUERY = 5; // name of router we are asking about
+    final static int FS_REQUEST = -5; // wraps header to signify that packet is a request from a Forwarding Service
+        final static int QUERY = -6; // name of router we are asking about
+        // include REQUESTOR_NAME (declared further below)
         
-        final static int PACKET_HEADER = 6; // wraps packets header info
-            final static int DESTINATION_ID = 7; // ID of final destination
-            final static int SOURCE_ID = 9; // ID of initial source
-            final static int PACKET_TYPE = 10; // Type of packet being transmitted (irrelevant for assignment but need irl)
-            final static int PACKET = 11; // the actual packet
+        final static int PACKET_HEADER = -7; // wraps packets header info
+            final static int DESTINATION_ID = -8; // ID of final destination
+            final static int SOURCE_ID = -9; // ID of initial source
+            final static int PACKET_TYPE = -10; // Type of packet being transmitted (irrelevant for assignment but need irl)
+            final static int PACKET = -11; // the actual packet
 
-    final static int CONNECTION_REQUEST = 12; // request from router to connect to another router / make presence known
-        final static int REQUESTOR_NAME = 13; // ID of FS
-        final static int CONNECT_TO = 14; // router to connect to
+    final static int CONNECTION_REQUEST = -12; // request from router to connect to another router / make presence known
+        final static int REQUESTOR_NAME = -13; // ID of FS
+        final static int CONNECT_TO = -14; // router to connect to
     
-    final static int APP_ALERT = 15; // an alert from an App to a FS that it wants to receive stuff
+    final static int APP_ALERT = -15; // an alert from an App to a FS that it wants to receive stuff
         // REQUESTOR_NAME must be included;
-        final static int STRING = 16; // string to associate with app
+        final static int STRING = -16; // string to associate with app
     
     
     
@@ -120,7 +121,7 @@ public class Router {
             packet[index++] = 'p';
 
             packet[index++] = PACKET;
-            String p = "TESTING FS";
+            String p = "TESTING";
             byte[] pB = p.getBytes();
             packet[index++] = (byte) pB.length;
             for(int i = 0; i<pB.length; i++)
@@ -133,7 +134,12 @@ public class Router {
                 send(packet, InetAddress.getByName("fs"), FS_PORT);
                 Thread.sleep(2000);
             }
+
+            
         }
+        while(true){
+                receive();
+            }
     }
 
     public static byte[] receive() throws IOException{
