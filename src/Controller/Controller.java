@@ -90,9 +90,10 @@ public class Controller {
         System.out.println("Dest router: "+query);
 
         String next = findNext(requestor,query);
+        System.out.println("Finished findNext()");
         if(next == null)
             return; 
-
+        System.out.println("Next node is: "+next);
         InetAddress nextAddress = addresses.get(next);
         // create reply
         byte[] reply = new byte[2+(2+(2+query.length())+(2+next.length())+data.length-index)];
@@ -132,11 +133,12 @@ public class Controller {
             return null;
         
         // prep work for dijkstra
-
+        System.out.println("Check 1");
         HashMap<String, Boolean> visitedNodes = new HashMap<>();
         for(Entry<String, InetAddress> pair : addresses.entrySet())
             visitedNodes.put(pair.getKey(), false);
 
+        System.out.println("Check 2");
         HashMap<String, HashMap<String,Double>> distances = new HashMap<>();
         for(Entry<String, InetAddress> map : addresses.entrySet()){
             HashMap<String, Double> distanceMap = new HashMap<>(); // create new map
@@ -145,6 +147,7 @@ public class Controller {
             distances.put(map.getKey(), distanceMap); // add to map of maps
         }
 
+        System.out.println("Check 3");
         // let distance from start to start = 0
         distances.get(start).put(start, 0.0);
         
@@ -165,40 +168,53 @@ public class Controller {
             currentNode = previousNodes.get(currentNode);
             counter++;
         }
-
+        System.out.println("Routing failed");
         return null;
     }
 
 
     private static void runDijkstra(String start, String current, String end, 
     HashMap<String, Boolean> visitedNodes, HashMap<String, HashMap<String,Double>> distances, HashMap<String,String> previousNodes){
+        System.out.println("Check 4");
         ArrayList<String> neighbours = connections.get(current);
         boolean allVisited = true; // assume true
 
         for(Boolean nodeVisited: visitedNodes.values())
             allVisited = allVisited && nodeVisited;
 
-        while(!allVisited){
-            for(String neighbour: neighbours){
-                if(!visitedNodes.get(neighbour)){
-                    double knownDistance = distances.get(start).get(neighbour); // get known distance
-                    double newDistance = distances.get(start).get(current)+1; // get current distance
+        if(allVisited)
+            return; // finished
 
-                    double smallestDistance = (knownDistance>newDistance)? newDistance:knownDistance; // check which is smallest
-                    distances.get(start).put(neighbour, smallestDistance); // update table
+        System.out.println("Check 5");
+        double closestDistance = Double.POSITIVE_INFINITY;
+        String closest = "";
+        for(String neighbour: neighbours){
+            if(!visitedNodes.get(neighbour)){
+                double knownDistance = distances.get(start).get(neighbour); // get known distance
+                double newDistance = distances.get(start).get(current)+1; // get current distance
 
-                    if(smallestDistance<knownDistance)
-                        previousNodes.put(neighbour, current); // update previous vertex if needed
+                double smallestDistance = (knownDistance>newDistance)? newDistance:knownDistance; // check which is smallest
+                distances.get(start).put(neighbour, smallestDistance); // update table
 
-                    visitedNodes.put(current, true);
+                if(smallestDistance<knownDistance)
+                    previousNodes.put(neighbour, current); // update previous vertex if needed
+
+                visitedNodes.put(current, true);
+
+                // track closest neighbour
+                if(closestDistance>smallestDistance){
+                    closest = neighbour;
+                    closestDistance = smallestDistance;
                 }
-
             }
-            allVisited = true;
-            for(Boolean nodeVisited: visitedNodes.values())
-                allVisited = allVisited && nodeVisited;
         }
+
+        current = closest;
+        runDijkstra(start, current, end, visitedNodes, distances, previousNodes);
+        
+        System.out.println("Check 6");
     }
+
     
 
     private static void connect(byte[] data, InetAddress reqAddress){
