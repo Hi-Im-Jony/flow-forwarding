@@ -6,6 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class Controller {
     // header types
@@ -126,9 +128,78 @@ public class Controller {
     }
 
     private static String findNext(String start, String end){
+        if(!(addresses.containsKey(start) && addresses.containsKey(end)))
+            return null;
         
-        return "Trinity";
+        // prep work for dijkstra
+
+        HashMap<String, Boolean> visitedNodes = new HashMap<>();
+        for(Entry<String, InetAddress> pair : addresses.entrySet())
+            visitedNodes.put(pair.getKey(), false);
+
+        HashMap<String, HashMap<String,Double>> distances = new HashMap<>();
+        for(Entry<String, InetAddress> map : addresses.entrySet()){
+            HashMap<String, Double> distanceMap = new HashMap<>(); // create new map
+                for(Entry<String, InetAddress> node : addresses.entrySet())
+                    distanceMap.put(node.getKey(), Double.POSITIVE_INFINITY); // init all values to infinity
+            distances.put(map.getKey(), distanceMap); // add to map of maps
+        }
+
+        // let distance from start to start = 0
+        distances.get(start).put(start, 0.0);
+        
+        HashMap<String,String> previousNodes = new HashMap<>();
+        for(Entry<String, InetAddress> pair : addresses.entrySet())
+            previousNodes.put(pair.getKey(), "");
+
+        runDijkstra(start, start, end, visitedNodes, distances, previousNodes);
+        
+        // get path from previousNodes
+        String currentNode = end;
+        String previousNode = null;
+        int counter = 0;
+        while(counter<previousNodes.size()){
+            previousNode = previousNodes.get(currentNode);
+            if(previousNode.equals(start))
+                return currentNode;
+            currentNode = previousNodes.get(currentNode);
+            counter++;
+        }
+
+        return null;
     }
+
+
+    private static void runDijkstra(String start, String current, String end, 
+    HashMap<String, Boolean> visitedNodes, HashMap<String, HashMap<String,Double>> distances, HashMap<String,String> previousNodes){
+        ArrayList<String> neighbours = connections.get(current);
+        boolean allVisited = true; // assume true
+
+        for(Boolean nodeVisited: visitedNodes.values())
+            allVisited = allVisited && nodeVisited;
+
+        while(!allVisited){
+            for(String neighbour: neighbours){
+                if(!visitedNodes.get(neighbour)){
+                    double knownDistance = distances.get(start).get(neighbour); // get known distance
+                    double newDistance = distances.get(start).get(current)+1; // get current distance
+
+                    double smallestDistance = (knownDistance>newDistance)? newDistance:knownDistance; // check which is smallest
+                    distances.get(start).put(neighbour, smallestDistance); // update table
+
+                    if(smallestDistance<knownDistance)
+                        previousNodes.put(neighbour, current); // update previous vertex if needed
+
+                    visitedNodes.put(current, true);
+                }
+
+            }
+            allVisited = true;
+            for(Boolean nodeVisited: visitedNodes.values())
+                allVisited = allVisited && nodeVisited;
+        }
+    }
+    
 
     private static void connect(byte[] data, InetAddress reqAddress){
         int index = 0;
