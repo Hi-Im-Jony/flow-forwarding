@@ -32,7 +32,8 @@ public class Controller {
         final static int STRING = 14; // string to associate with app
         
     
-    private static HashMap<String, ArrayList<String>> connections;    
+    private static HashMap<String, ArrayList<String>> connections;   
+    private static HashMap<String, InetAddress> addresses; 
     
     static DatagramSocket socket;
     
@@ -40,7 +41,7 @@ public class Controller {
     public static void main(String[] args) throws IOException {
         // init stuff
         connections = new HashMap<>();
-        socket = new DatagramSocket(69);
+        socket = new DatagramSocket(42);
 
         System.out.println("Hello from Controller");
         receive();
@@ -61,9 +62,7 @@ public class Controller {
 
     }
 
-    private static void connect(byte[] data){
-        System.out.println("Attempting to connect a router");
-
+    private static void connect(byte[] data, InetAddress reqAddress){
         int index = 0;
         if(data[index++]!=CONNECTION_REQUEST)
             return;
@@ -78,14 +77,12 @@ public class Controller {
             requestor[i] = data[index++];
         }
         
-        System.out.println("Identified requestor as: " + new String(requestor));
 
         // prepare to add connections
         ArrayList<String> routersConnections = connections.get(new String(requestor));
         if(routersConnections==null)
             routersConnections = new ArrayList<>();
 
-        System.out.println("Connections to be made: " +numOfConnections);
         for(int i = 0; i<numOfConnections;i++){
             if(data[index++] != CONNECT_TO)
                 return;
@@ -101,8 +98,8 @@ public class Controller {
             routersConnections.add(connection);
         }
 
-        System.out.println("Connections made");
         connections.put(new String(requestor), routersConnections);
+        addresses.put(new String(requestor), reqAddress);
     }
 
     private static void receive() throws IOException{
@@ -116,14 +113,14 @@ public class Controller {
 
         // extract data from packet
         data= packet.getData();
-        System.out.println("Controller received: \""+data+",\" from: "+packet.getAddress());
+        System.out.println("Controller received: \""+new String(data)+",\" from: "+packet.getAddress());
 
         int dataType = data[0];
         
         if(dataType==FS_REQUEST)
             executeFsRequest(data);
         else if(dataType==CONNECTION_REQUEST)
-            connect(data);
+            connect(data,packet.getAddress());
     }
     private static void send(byte[] data, InetAddress address, int port) throws IOException{
         
