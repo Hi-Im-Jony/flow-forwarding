@@ -15,6 +15,7 @@ public class ForwardingService  {
     
     final static int FS_REQUEST = 4; // wraps header to signify that packet is a request from a Forwarding Service
         final static int QUERY = 5; // name of router we are asking about
+        // include REQUESTOR_NAME (declared further below)
         
         final static int PACKET_HEADER = 6; // wraps packets header info
             final static int DESTINATION_ID = 7; // ID of final destination
@@ -75,7 +76,7 @@ public class ForwardingService  {
             dest = dests[0]; // only interested in next "hop"
 
         int index = 0;
-        byte[] fsRequest = new byte[2+(2+dest.length()+data.length)];
+        byte[] fsRequest = new byte[2+(2+dest.length()+2+routerID.length()+data.length)];
 
         fsRequest[index++] = FS_REQUEST;
         fsRequest[index++] = 1;
@@ -85,6 +86,14 @@ public class ForwardingService  {
         byte[] destB = dest.getBytes();
         for(int i = 0; i<destB.length;i++)
             fsRequest[index++] = destB[i];
+
+        fsRequest[index++] = REQUESTOR_NAME;
+        fsRequest[index++] = (byte) routerID.length();
+        byte[] idB = routerID.getBytes();
+        for(int i = 0; i<idB.length;i++){
+            fsRequest[index++] = idB[i];
+        }
+        
         
         // add rest of data
         for(int i = 0; i<data.length;i++)
