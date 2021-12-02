@@ -1,5 +1,9 @@
 package Controller;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.HashMap;
 
 public class Controller {
@@ -16,20 +20,50 @@ public class Controller {
             final static int SOURCE_ID = 8; // ID of initial source
             final static int PACKET_TYPE = 9; // Type of packet being transmitted (irrelevant for assignment but need irl)
 
-    HashMap<String, // Dest
-            HashMap<Integer, // Src
-                    HashMap<Integer, // Router
-                        HashMap<String, // In
-                                Integer /* Out */>>>> table;
-    public static void main(String[] args) {
-        // TODO    
+
+    static DatagramSocket socket;
+    
+    final static int MTU = 1500;
+    public static void main(String[] args) throws IOException {
+        // init stuff
+        socket = new DatagramSocket(69);
+
+        System.out.println("Hello from Controller");
+        receive();
     }
 
-    private static void receive(){
-        // TODO
+    private static class ControllerThread extends Thread{
+        @Override
+        public void run() {
+            try {
+                receive();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
-    private static void send(){
-        // TODO
+
+    private static void receive() throws IOException{
+        ControllerThread backup = new ControllerThread();
+
+        byte[] data= new byte[MTU];
+        DatagramPacket packet= new DatagramPacket(data, data.length);
+    
+        socket.receive(packet);
+        backup.start();
+
+        // extract data from packet
+        data= packet.getData();
+
+        System.out.println("Controller received: \""+data+",\" from: "+packet.getAddress());
+        
+        
+    }
+    private static void send(byte[] data, InetAddress address, int port) throws IOException{
+        
+        // create packet addressed to destination
+        DatagramPacket packet= new DatagramPacket(data, data.length, address, port);
+        socket.send(packet);
     }
 
 }
