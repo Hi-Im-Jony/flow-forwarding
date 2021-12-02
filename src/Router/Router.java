@@ -50,7 +50,7 @@ public class Router {
         ArrayList<byte[]> connectionHeaders = new ArrayList<>(); // prepare to make connections
 
         // prepare connection headers
-        for(int i = 1; i<args.length-1;i++){
+        for(int i = 1; i<args.length;i++){
             byte[] header = new byte[2+(args[i].length())];
             int index = 0;
             header[index++] = CONNECT_TO;
@@ -73,6 +73,7 @@ public class Router {
 
         int index = 0;
         connectionRequest[index++] = CONNECTION_REQUEST;
+        System.out.println("Connections to request: "+ connectionHeaders.size());
         connectionRequest[index++] =  (byte) (connectionHeaders.size());
 
         connectionRequest[index++] = REQUESTOR_ID;
