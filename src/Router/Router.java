@@ -57,7 +57,7 @@ public class Router {
             header[index++] = (byte) args[i].length();
             byte[] bytes = args[i].getBytes();
             for(int j = 0; j<bytes.length;j++)
-                header[index++]=bytes[i];
+                header[index++]=bytes[j];
             connectionHeaders.add(header);
         }
 

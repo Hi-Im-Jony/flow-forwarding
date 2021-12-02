@@ -73,7 +73,6 @@ public class Controller {
         if(data[index++]!=REQUESTOR_ID)
             return;
         int requestorLen = data[index++];
-        System.out.println("Requestor len is: "+requestorLen);
         byte[] requestor = new byte[requestorLen];
         for(int i = 0;i<requestorLen;i++){
             requestor[i] = data[index++];
@@ -92,11 +91,13 @@ public class Controller {
                 return;
             int nameLen = data[index++];
             byte[] name = new byte[nameLen] ;
-            for(int j = 0; j<nameLen;j++)
-                name[i] = data[index++];
+            for(int j = 0; j<nameLen;j++){
+                name[j] = data[index++];
+            }
+                
             
             String connection = new String(name);
-            System.out.print("Connecting: "+new String(requestor)+"to "+connection);
+            System.out.println("Connecting: "+new String(requestor)+" to "+connection);
             routersConnections.add(connection);
         }
 
