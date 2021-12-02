@@ -81,40 +81,40 @@ public class Router {
         System.out.println("Hello from Router "+name);
         
         // hard coding a test for FS
-        byte[] packet = new byte[MTU];
+        // byte[] packet = new byte[MTU];
 
-        index = 0;
-        packet[index++] = PACKET_HEADER;
-        packet[index++] = 0;
+        // index = 0;
+        // packet[index++] = PACKET_HEADER;
+        // packet[index++] = 0;
 
-        packet[index++] = DESTINATION_ID;
-        String s = "trinity";
-        byte[] sB = s.getBytes();
-        packet[index++] = (byte) sB.length;
-        for(int i = 0; i<sB.length; i++)
-            packet[index++] = sB[i];
+        // packet[index++] = DESTINATION_ID;
+        // String s = "trinity";
+        // byte[] sB = s.getBytes();
+        // packet[index++] = (byte) sB.length;
+        // for(int i = 0; i<sB.length; i++)
+        //     packet[index++] = sB[i];
 
-        packet[index++] = SOURCE_ID;
-        packet[index++] = 1;
-        packet[index++] = 69;
+        // packet[index++] = SOURCE_ID;
+        // packet[index++] = 1;
+        // packet[index++] = 69;
 
-        packet[index++] = PACKET_TYPE;
-        packet[index++] = 1;
-        packet[index++] = 1;
+        // packet[index++] = PACKET_TYPE;
+        // packet[index++] = 1;
+        // packet[index++] = 1;
 
-        packet[index++] = PACKET;
-        String p = "TESTING FS";
-        byte[] pB = p.getBytes();
-        packet[index++] = (byte) pB.length;
-        for(int i = 0; i<pB.length; i++)
-            packet[index++] = pB[i];
+        // packet[index++] = PACKET;
+        // String p = "TESTING FS";
+        // byte[] pB = p.getBytes();
+        // packet[index++] = (byte) pB.length;
+        // for(int i = 0; i<pB.length; i++)
+        //     packet[index++] = pB[i];
 
         
         
-        while(true){
-            send(packet, InetAddress.getByName("fs"), FS_PORT);
-            Thread.sleep(2000);
-        }
+        // while(true){
+        //     send(packet, InetAddress.getByName("fs"), FS_PORT);
+        //     Thread.sleep(2000);
+        // }
     }
 
     public static byte[] receive() throws IOException{
