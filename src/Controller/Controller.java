@@ -80,12 +80,13 @@ public class Controller {
         }
         
         System.out.println("Identified requestor as: " + new String(requestor));
-        
+
         // prepare to add connections
         ArrayList<String> routersConnections = connections.get(new String(requestor));
         if(routersConnections==null)
             routersConnections = new ArrayList<>();
 
+        System.out.println("Connections to be made: " +numOfConnections);
         for(int i = 0; i<numOfConnections;i++){
             if(data[index++] != CONNECT_TO)
                 return;
@@ -97,8 +98,8 @@ public class Controller {
             String connection = new String(name);
             System.out.print("Connecting: "+new String(requestor)+"to "+connection);
             routersConnections.add(connection);
-            
         }
+
         System.out.println("Connections made");
         connections.put(new String(requestor), routersConnections);
     }
