@@ -87,7 +87,7 @@ public class Router {
                 connectionRequest[index++] = currentHeader[j];
         }
 
-        send(connectionRequest, InetAddress.getByName("controller"), 69); // send connection requesto to controller
+        send(connectionRequest, InetAddress.getByName("controller"), 42); // send connection reques to to controller
 
 
         System.out.println("Hello from Router "+name);
