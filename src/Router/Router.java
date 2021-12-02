@@ -47,7 +47,7 @@ public class Router {
 
         name = args[0]; // set name
 
-        ArrayList<byte[]> connectionsToMake = new ArrayList<>(); // prepare to make connections
+        ArrayList<byte[]> connectionHeaders = new ArrayList<>(); // prepare to make connections
 
         // prepare connection headers
         for(int i = 1; i<args.length-1;i++){
@@ -58,19 +58,30 @@ public class Router {
             byte[] bytes = args[i].getBytes();
             for(int j = 0; j<bytes.length;j++)
                 header[index++]=bytes[i];
-            connectionsToMake.add(header);
+            connectionHeaders.add(header);
         }
 
+        // create request header
         int len = 0;
-        for(int i = 0; i<connectionsToMake.size();i++)
-            len = len + connectionsToMake.get(i).length;
-        len+=2;    
+        for(int i = 0; i<connectionHeaders.size();i++)
+            len = len + connectionHeaders.get(i).length;
+
+        byte[] nameInBytes = name.getBytes();
+
+        len+=2+(2+nameInBytes.length);    
         byte[] connectionRequest = new byte[len];
+
         int index = 0;
         connectionRequest[index++] = CONNECTION_REQUEST;
-        connectionRequest[index++] =  (byte) (connectionsToMake.size());
-        for(int i = 0; i<connectionsToMake.size();i++){
-            byte[] currentHeader = connectionsToMake.get(i);
+        connectionRequest[index++] =  (byte) (connectionHeaders.size());
+
+        connectionRequest[index++] = REQUESTOR_ID;
+        connectionRequest[index++] = (byte) nameInBytes.length;
+        for(int i = 0; i<nameInBytes.length;i++)
+            connectionRequest[index++] = nameInBytes[i];
+
+        for(int i = 0; i<connectionHeaders.size();i++){
+            byte[] currentHeader = connectionHeaders.get(i);
             for(int j = 0; j<currentHeader.length;j++)
                 connectionRequest[index++] = currentHeader[j];
         }
