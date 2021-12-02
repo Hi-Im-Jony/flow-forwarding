@@ -6,38 +6,22 @@ services:
     command: java Router.java gold
     links:
       - "1-forwarding-service:fs"
-    networks:
-      - m1
 
   1-forwarding-service:
     build: src/ForwardingService
     command: java ForwardingService.java gold
-    networks:
-      - m1
-      - controller
 
-  # 2-router:
-  #   build: src/Router/
-  #   command: java Router.java gold
-  #   links:
-  #     - "2-forwarding-service:fs"
-  #   networks:
-  #     - m2
+  2-router:
+    build: src/Router/
+    command: java Router.java gold
+    links:
+      - "2-forwarding-service:fs"
 
-  # 2-forwarding-service:
-  #   build: src/ForwardingService
-  #   command: java ForwardingService.java gold
-  #   networks:
-  #     - m2
-  #     -  controller
+  2-forwarding-service:
+    build: src/ForwardingService
+    command: java ForwardingService.java gold
 
   tcpdump:
     image: kaazing/tcpdump
-    network_mode: "host"
     volumes:
       - ./tcpdump:/tcpdump
-
-networks:
-  m1:
-  m2:
-  controller:
