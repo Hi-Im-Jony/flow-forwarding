@@ -46,6 +46,7 @@ public class ForwardingService  {
 
     private static void forward(byte[] data, String dest) throws IOException{
         if(forwardingTable.containsKey(dest)){
+            System.out.println("Forwarding:"+new String(data)+", to "+dest);
             InetAddress address = InetAddress.getByAddress(forwardingTable.get(dest));
             send(data, address, ROUTER_PORT);
         }
@@ -58,6 +59,7 @@ public class ForwardingService  {
     }
 
     private static void contactController(byte[] data, String dest) throws IOException{
+        System.out.println("Contacting controller about: "+dest);
         // TODO
     }
 
@@ -94,67 +96,80 @@ public class ForwardingService  {
         String[] dests = dest.split(".");
         
 
-        String prefix = dests[0]; // next hop
-        if(prefix.equals(routerID)){ // we can drop the prefix
-            // drop prefix
-            dest = "";
-            for(int i = 1; i<dests.length;i++){
-                dest = dest+dests[i]+".";
+        if(dests.length>0){
+            String prefix = dests[0]; // next hop
+            if(prefix.equals(routerID)){ // we can drop the prefix
+                // drop prefix
+                dest = "";
+                for(int i = 1; i<dests.length;i++){
+                    dest = dest+dests[i]+".";
+                }
+                dest = dest.substring(0,dest.length()-1); // remove last "."
+
+                byte[] destInBytes = dest.getBytes();
+
+                // redo header to change dest field
+                int newHeaderLen = 2+(2+destInBytes.length+2+headerInfo[1].length+2+headerInfo[2].length+2+headerInfo[3].length);
+                byte[] newHeader = new byte[newHeaderLen];
+                int index = 0;
+                newHeader[index++] = PACKET_HEADER;
+                newHeader[index++] = (byte) (newHeaderLen-2);
+
+                newHeader[index++] = DESTINATION_ID;
+                newHeader[index++] = (byte) destInBytes.length;
+                for(int i = 0; i<destInBytes.length;i++){
+                    newHeader[index++] = destInBytes[i];
+                }
+
+                newHeader[index++] = SOURCE_ID;
+                newHeader[index++] = (byte) headerInfo[1].length;
+                for(int i = 0; i<headerInfo[1].length;i++){
+                    newHeader[index++] = headerInfo[1][i];
+                }
+
+                newHeader[index++] = PACKET_HEADER;
+                newHeader[index++] = (byte) headerInfo[2].length;
+                for(int i = 0; i<headerInfo[2].length;i++){
+                    newHeader[index++] = headerInfo[2][i];
+                }
+
+                newHeader[index++] = PACKET;
+                newHeader[index++] = (byte) headerInfo[3].length;
+                for(int i = 0; i<headerInfo[3].length; i++){
+                    newHeader[index++] = headerInfo[2][i];
+                }
+                forward(newHeader, dest);
+                return;
             }
-            dest = dest.substring(0,dest.length()-1); // remove last "."
 
-            byte[] destInBytes = dest.getBytes();
-
-            // redo header to change dest field
-            int newHeaderLen = 2+(2+destInBytes.length+2+headerInfo[1].length+2+headerInfo[2].length+2+headerInfo[3].length);
-            byte[] newHeader = new byte[newHeaderLen];
-            int index = 0;
-            newHeader[index++] = PACKET_HEADER;
-            newHeader[index++] = (byte) (newHeaderLen-2);
-
-            newHeader[index++] = DESTINATION_ID;
-            newHeader[index++] = (byte) destInBytes.length;
-            for(int i = 0; i<destInBytes.length;i++){
-                newHeader[index++] = destInBytes[i];
-            }
-
-            newHeader[index++] = SOURCE_ID;
-            newHeader[index++] = (byte) headerInfo[1].length;
-            for(int i = 0; i<headerInfo[1].length;i++){
-                newHeader[index++] = headerInfo[1][i];
-            }
-
-            newHeader[index++] = PACKET_HEADER;
-            newHeader[index++] = (byte) headerInfo[2].length;
-            for(int i = 0; i<headerInfo[2].length;i++){
-                newHeader[index++] = headerInfo[2][i];
-            }
-
-            newHeader[index++] = PACKET;
-            newHeader[index++] = (byte) headerInfo[3].length;
-            for(int i = 0; i<headerInfo[3].length; i++){
-                newHeader[index++] = headerInfo[2][i];
-            }
-            forward(newHeader, dest);
-            return;
         }
-
-        else // don't drop prefix as it hasn't gotten to destination
+        else // don't drop prefix as it hasn't gotten to destination / there is no prefix, so just forward
             forward(data, dest);
     }
 
     public static byte[][] interpretReply(byte[] data){
-        byte[][] ret = new byte[3][];
+        byte[][] ret = new byte[4][];
         byte[] routerToUpdate, update, destination, source, packetType, packet;
         int index = 0;
-        if(data[index+=2]!=CONTROLLER_REPLY) // skip len, irrelevant
+        if(data[index++]!=CONTROLLER_REPLY) // skip len, irrelevant
+        {
+            System.out.println("Error 1");
             return null;
+        }
+        index++;
         
-        if(data[index+=2]!=UPDATE) // skip len, irrelevant
+        if(data[index++]!=UPDATE) // skip len, irrelevant
+        {
+            System.out.println("Error 2");
             return null;
+        }
+        index++;
         
         if(data[index++]!=ROUTER_ID)
+        {
+            System.out.println("Error 3");
             return null;
+        }
         int routerIdLen = data[index++]; 
         routerToUpdate = new byte[routerIdLen];
         for(int i = 0; i<routerIdLen;i++){
@@ -162,18 +177,28 @@ public class ForwardingService  {
         }
 
         if(data[index++]!=UPDATED_VAL)
+        {
+            System.out.println("Error 4");
             return null;
+        }
         int updateLen = data[index++];
         update = new byte[updateLen];
         for(int i = 0; i<updateLen;i++){
             update[i] =  data[index++];
         }
         
-        if(data[index+=2] != PACKET_HEADER) // skip len, irrelevant
+        if(data[index++] != PACKET_HEADER) // skip len, irrelevant
+        {
+            System.out.println("Error 5");
             return null;
+        }
+        index++;
         
         if(data[index++] != DESTINATION_ID)
+        {
+            System.out.println("Error 6");
             return null;
+        }
         int destinationLenght = data[index++];
         destination = new byte[destinationLenght];
         for(int i = 0;i<destinationLenght;i++){
@@ -181,20 +206,30 @@ public class ForwardingService  {
         }
 
         if(data[index++] != SOURCE_ID)
+        {
+            System.out.println("Error 7");
             return null;
+        }
         int sourceLen = data[index++];
         source = new byte[sourceLen];
         for(int i = 0; i<sourceLen;i++){
             source[i] = data[index++];
         }
 
-        if(data[index+=2] != PACKET_TYPE) // skip len, irrelevant
+        if(data[index++] != PACKET_TYPE) // skip len, irrelevant
+        {
+            System.out.println("Error 8");
             return null;
+        }
+        index++;
         packetType = new byte[1];
         packetType[0] = data[index++]; 
 
         if(data[index++]!= PACKET)
+        {
+            System.out.println("Error 9");
             return null;
+        }
         int packetLen = data[index++];
         packet = new byte[packetLen];
         for(int i = 0; i<packetLen;i++){
@@ -213,16 +248,23 @@ public class ForwardingService  {
     }
 
     public static byte[][] interpretHeader(byte[] data){
-        byte[][] ret = new byte[3][];
+        byte[][] ret = new byte[4][];
         byte[] destination, source, packetType, packet;
 
         int index = 0;
-
-        if(data[index+=2] != PACKET_HEADER) // skip len, irrelevant
+        int checker =  0;
+        if( data[index++] != (byte) PACKET_HEADER) // skip len, irrelevant
+        {
+            System.out.println("Error 10: index  is: "+index);
+            System.out.println("Error 10: checker is: "+checker);
             return null;
-        
+        }
+        index++;
         if(data[index++] != DESTINATION_ID)
+        {
+            System.out.println("Error 11");
             return null;
+        }
         int destinationLenght = data[index++];
         destination = new byte[destinationLenght];
         for(int i = 0;i<destinationLenght;i++){
@@ -230,20 +272,30 @@ public class ForwardingService  {
         }
 
         if(data[index++] != SOURCE_ID)
+        {
+            System.out.println("Error 12");
             return null;
+        }
         int sourceLen = data[index++];
         source = new byte[sourceLen];
         for(int i = 0; i<sourceLen;i++){
             source[i] = data[index++];
         }
 
-        if(data[index+=2] != PACKET_TYPE) // skip len, irrelevant
+        if(data[index++] != PACKET_TYPE) // skip len, irrelevant
+        {
+            System.out.println("Error 13");
             return null;
+        }
+        index++;
         packetType = new byte[1];
         packetType[0] = data[index++]; 
 
         if(data[index++]!= PACKET)
+        {
+            System.out.println("Error 14");
             return null;
+        }
         int packetLen = data[index++];
         packet = new byte[packetLen];
         for(int i = 0; i<packetLen;i++){
