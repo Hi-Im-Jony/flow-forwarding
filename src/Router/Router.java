@@ -37,41 +37,39 @@ public class Router {
         id = args[0];
         System.out.println("Hello from Router "+id);
         
-        // hard coding a test for FS
-        byte[] packet = new byte[MTU];
+        // // hard coding a test for FS
+        // byte[] packet = new byte[MTU];
 
-        int index = 0;
-        packet[index++] = PACKET_HEADER;
-        packet[index++] = 0;
+        // int index = 0;
+        // packet[index++] = PACKET_HEADER;
+        // packet[index++] = 0;
 
-        packet[index++] = DESTINATION_ID;
-        String s = "trinity";
-        byte[] sB = s.getBytes();
-        packet[index++] = (byte) sB.length;
-        for(int i = 0; i<sB.length; i++)
-            packet[index++] = sB[i];
+        // packet[index++] = DESTINATION_ID;
+        // String s = "trinity";
+        // byte[] sB = s.getBytes();
+        // packet[index++] = (byte) sB.length;
+        // for(int i = 0; i<sB.length; i++)
+        //     packet[index++] = sB[i];
 
-        packet[index++] = SOURCE_ID;
-        packet[index++] = 1;
-        packet[index++] = 69;
+        // packet[index++] = SOURCE_ID;
+        // packet[index++] = 1;
+        // packet[index++] = 69;
 
-        packet[index++] = PACKET_TYPE;
-        packet[index++] = 1;
-        packet[index++] = 1;
+        // packet[index++] = PACKET_TYPE;
+        // packet[index++] = 1;
+        // packet[index++] = 1;
 
-        packet[index++] = PACKET;
-        String p = "TESTING FS";
-        byte[] pB = p.getBytes();
-        packet[index++] = (byte) pB.length;
-        for(int i = 0; i<pB.length; i++)
-            packet[index++] = pB[i];
+        // packet[index++] = PACKET;
+        // String p = "TESTING FS";
+        // byte[] pB = p.getBytes();
+        // packet[index++] = (byte) pB.length;
+        // for(int i = 0; i<pB.length; i++)
+        //     packet[index++] = pB[i];
 
         
         
         while(true){
-            Thread.sleep(2000);
-            System.out.println("Sending to FS");
-            send(packet, InetAddress.getByName("fs"), FS_PORT);
+            receive();
         }
     }
 
@@ -87,7 +85,7 @@ public class Router {
 
         System.out.println("Router received: \""+data+",\" from: "+packet.getAddress());
         
-        InetAddress address= InetAddress.getLocalHost();
+        InetAddress address= InetAddress.getByName("fs");
         send(data, address, FS_PORT); // send to forwarding service
         return data;
     }
