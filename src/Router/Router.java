@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 public class Router {
     // header types
@@ -31,7 +32,7 @@ public class Router {
     
     
             
-    private static String id;
+    private static String name;
     final static int MTU = 1500;
     final static int ROUTER_PORT = 80;
     final static int FS_PORT = 51510;
@@ -43,13 +44,46 @@ public class Router {
         
         
         socket = new DatagramSocket(ROUTER_PORT);
-        id = args[0];
-        System.out.println("Hello from Router "+id);
+
+        name = args[0]; // set name
+
+        ArrayList<byte[]> connectionsToMake = new ArrayList<>(); // prepare to make connections
+
+        // prepare connection headers
+        for(int i = 1; i<args.length-1;i++){
+            byte[] header = new byte[2+(args[i].length())];
+            int index = 0;
+            header[index++] = CONNECT_TO;
+            header[index++] = (byte) args[i].length();
+            byte[] bytes = args[i].getBytes();
+            for(int j = 0; j<bytes.length;j++)
+                header[index++]=bytes[i];
+            connectionsToMake.add(header);
+        }
+
+        int len = 0;
+        for(int i = 0; i<connectionsToMake.size();i++)
+            len = len + connectionsToMake.get(i).length;
+        len+=2;    
+        byte[] connectionRequest = new byte[len];
+        int index = 0;
+        connectionRequest[index++] = CONNECTION_REQUEST;
+        connectionRequest[index++] =  (byte) (connectionsToMake.size());
+        for(int i = 0; i<connectionsToMake.size();i++){
+            byte[] currentHeader = connectionsToMake.get(i);
+            for(int j = 0; j<currentHeader.length;j++)
+                connectionRequest[index++] = currentHeader[j];
+        }
+
+        send(connectionRequest, InetAddress.getByName("controller"), 69); // send connection requesto to controller
+
+
+        System.out.println("Hello from Router "+name);
         
         // hard coding a test for FS
         byte[] packet = new byte[MTU];
 
-        int index = 0;
+        index = 0;
         packet[index++] = PACKET_HEADER;
         packet[index++] = 0;
 
