@@ -59,17 +59,22 @@ public class Controller {
         }
     }
 
-    private static void executeFsRequest(byte[] data, InetAddress address){
+    private static void executeFsRequest(byte[] data, InetAddress reqAddress){
         int index = 0;
         if(data[index++]!=FS_REQUEST)
             return;
         index++; // can skip L bit
-        if(data[index++]!= REQUESTOR_NAME)
+        if(data[index++]!= QUERY)
             return;
-        int reqLen = data[index++];
-        byte[] reqId = new byte[reqLen];
+        int queryLen = data[index++];
+        byte[] queryB = new byte[queryLen];
+        for(int i = 0; i<queryB.length;i++)
+            queryB[i] = data[index++];
+        String query= new String(queryB);
 
-        
+        if(addresses.containsKey(query))
+            System.out.println("Address found");
+        else System.out.println("Address not fouund");
     }
 
     private static void connect(byte[] data, InetAddress reqAddress){
