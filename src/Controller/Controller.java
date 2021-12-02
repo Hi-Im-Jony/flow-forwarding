@@ -39,6 +39,7 @@ public class Controller {
     final static int MTU = 1500;
     public static void main(String[] args) throws IOException {
         // init stuff
+        connections = new HashMap<>();
         socket = new DatagramSocket(69);
 
         System.out.println("Hello from Controller");
@@ -72,12 +73,14 @@ public class Controller {
         if(data[index++]!=REQUESTOR_ID)
             return;
         int requestorLen = data[index++];
+        System.out.println("Requestor len is: "+requestorLen);
         byte[] requestor = new byte[requestorLen];
         for(int i = 0;i<requestorLen;i++){
             requestor[i] = data[index++];
         }
         
-        System.out.println("Identified requestor as:" + new String(requestor));
+        System.out.println("Identified requestor as: " + new String(requestor));
+        
         // prepare to add connections
         ArrayList<String> routersConnections = connections.get(new String(requestor));
         if(routersConnections==null)
@@ -92,6 +95,7 @@ public class Controller {
                 name[i] = data[index++];
             
             String connection = new String(name);
+            System.out.print("Connecting: "+new String(requestor)+"to "+connection);
             routersConnections.add(connection);
             
         }
