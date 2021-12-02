@@ -3,15 +3,21 @@ version: "3"
 services:
   router:
     build: src/Router/
-    command: bash -c "java Router.java gold && java ForwardingService.java gold"
+    command: java Router.java gold
+    networks:
+      - m1
 
-  node:
-    build: src/Node/
-    command: java Node.java
-    network_mode: "host"
+  forwarding-service:
+    build: src/ForwardingService
+    command: java ForwardingService.java gold
+    networks:
+      - m1
 
   tcpdump:
     image: kaazing/tcpdump
     network_mode: "host"
     volumes:
       - ./tcpdump:/tcpdump
+
+networks:
+  m1:
