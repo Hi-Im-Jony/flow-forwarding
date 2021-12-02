@@ -41,6 +41,7 @@ public class Controller {
     public static void main(String[] args) throws IOException {
         // init stuff
         connections = new HashMap<>();
+        addresses = new HashMap<>();
         socket = new DatagramSocket(42);
 
         System.out.println("Hello from Controller");
