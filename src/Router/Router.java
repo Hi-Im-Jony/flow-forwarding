@@ -105,7 +105,6 @@ public class Router {
         packet[index++] = (byte) sB.length;
         for(int i = 0; i<sB.length; i++){
             packet[index++] = sB[i];
-            System.out.println((char)(sB[i]));
         }
             
 
