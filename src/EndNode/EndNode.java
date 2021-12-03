@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -17,7 +18,7 @@ public class EndNode {
             final static int UPDATED_VAL = -4; // value to update to
     
     final static int FS_REQUEST = -5; // wraps header to signify that packet is a request from a Forwarding Service
-        final static int QUERY = -6; // nodeName of router we are asking about
+        final static int QUERY = -6; // appName of router we are asking about
         // include REQUESTOR_NAME (declared further below)
         
         final static int PACKET_HEADER = -7; // wraps packets header info
@@ -38,26 +39,66 @@ public class EndNode {
     final static int MTU = 1500;
     final static int FS_PORT = 51510;
     final static int EN_PORT = 8080;
-    final static int APP_PORT = 20;
+    final static int APP_PORT = 80;
 
-    private static String nodeName;
-    private static String appString; // nodeName to give to app
+    private static String appName;
     private static DatagramSocket socket;
 
     public static void main(String[] args) throws IOException {
 
-        if(args.length!=2){
-            System.out.println("Incorrect args for EndNode, please pass in node name and app string");
+        if(args.length>1){
+            System.out.println("Incorrect args for EndNode, please pass in node name and default router ");
             return;
         }
         
-        nodeName = args[0];
-        appString = args[1];
+        appName = args[0];
 
         socket = new DatagramSocket(EN_PORT);
 
         ForwardingService fs = new ForwardingService();
         fs.start();
+
+        ArrayList<byte[]> connectionHeaders = new ArrayList<>(); // prepare to make connections
+
+        // prepare connection headers
+        for(int i = 1; i<args.length;i++){
+            byte[] header = new byte[2+(args[i].length())];
+            int index = 0;
+            header[index++] = CONNECT_TO;
+            header[index++] = (byte) args[i].length();
+            byte[] bytes = args[i].getBytes();
+            for(int j = 0; j<bytes.length;j++)
+                header[index++]=bytes[j];
+            connectionHeaders.add(header);
+        }
+
+        // create request header
+        int len = 0;
+        for(int i = 0; i<connectionHeaders.size();i++)
+            len = len + connectionHeaders.get(i).length;
+
+        byte[] nameInBytes = appName.getBytes();
+
+        len+=2+(2+nameInBytes.length);    
+        byte[] connectionRequest = new byte[len];
+
+        int index = 0;
+        connectionRequest[index++] = CONNECTION_REQUEST;
+        System.out.println("Connections to request: "+ connectionHeaders.size());
+        connectionRequest[index++] =  (byte) (connectionHeaders.size());
+
+        connectionRequest[index++] = REQUESTOR_NAME;
+        connectionRequest[index++] = (byte) nameInBytes.length;
+        for(int i = 0; i<nameInBytes.length;i++)
+            connectionRequest[index++] = nameInBytes[i];
+
+        for(int i = 0; i<connectionHeaders.size();i++){
+            byte[] currentHeader = connectionHeaders.get(i);
+            for(int j = 0; j<currentHeader.length;j++)
+                connectionRequest[index++] = currentHeader[j];
+        }
+
+        send(connectionRequest, InetAddress.getByName("controller"), 42); // send connection reques to to controller
 
         App app = new App();
         app.start();
@@ -76,14 +117,21 @@ public class EndNode {
         // extract data from packet
         data= packet.getData();
 
-        System.out.println(nodeName+" received: \""+new String(data)+",\"");
+        System.out.println(appName+" received: \""+new String(data)+",\"");
         
+    }
+
+    public static void send(byte[] data, InetAddress address, int port) throws IOException{
+        
+        // create packet addressed to destination
+        DatagramPacket packet= new DatagramPacket(data, data.length, address, port);
+        socket.send(packet);
     }
 
     private static class App extends Thread{
         private String string;
         App(){
-            string = appString;
+            string = appName;
 
             // alert forwarding service
             int index = 0;
@@ -166,7 +214,7 @@ public class EndNode {
             // init
             forwardingTable = new HashMap<>();
             socket = new DatagramSocket(FS_PORT);
-            client = nodeName;
+            client = appName;
             System.out.println("Hello from FS");
         }
 
