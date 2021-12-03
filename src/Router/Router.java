@@ -103,7 +103,7 @@ public class Router {
             String p = "TESTING";
             byte[] pB = p.getBytes();
 
-            String s = "r4"; // destination in tests
+            String s = "r5"; // destination in tests
             byte[] sB = s.getBytes();
 
             byte[] packet = new byte[2+(2+sB.length)+(2+name.length())+2+1+2+pB.length];
@@ -218,7 +218,7 @@ public class Router {
                 InetAddress address = forwardingTable.get(dest);
                 //System.out.println("Forwarding:"+new String(data)+", to "+address.getHostName());
                 //System.out.println("Dest addr is "+ address.toString());
-                send(data, address, ROUTER_PORT);
+                send(data, address, FS_PORT);
                 //System.out.println("Sent...");
             }
             else
