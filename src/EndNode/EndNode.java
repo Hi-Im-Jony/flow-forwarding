@@ -13,8 +13,9 @@ import java.util.Random;
 public class EndNode {
     // header types
     final static int CONTROLLER_REPLY = -1; // wraps header to signify packet is a reply from Controller
+    final static int APP_ALERT = -15; // an alert from an App to a FS that it wants to receive stuff
         final static int UPDATE = -2; // always length 2, first value is id of router to change, second value is updated data
-            final static int ROUTER_ID = -3; // ID of router that will be updated
+            final static int UPDATE_KEY = -3; // ID of router that will be updated
             final static int UPDATED_VAL = -4; // value to update to
     
     final static int FS_REQUEST = -5; // wraps header to signify that packet is a request from a Forwarding Service
@@ -31,9 +32,8 @@ public class EndNode {
         final static int REQUESTOR_NAME = -13; // ID of FS
         final static int CONNECT_TO = -14; // router to connect to
     
-    final static int APP_ALERT = -15; // an alert from an App to a FS that it wants to receive stuff
-        // REQUESTOR_NAME must be included;
-        final static int STRING = -16; // string to associate with app
+   
+        
 
 
     final static int MTU = 1500;
@@ -130,22 +130,46 @@ public class EndNode {
 
     private static class App extends Thread{
         private String string;
-        App(){
+        App() throws IOException{
             string = appName;
 
             // alert forwarding service
             int index = 0;
+            byte[] alert = new byte[MTU];
+
+            alert[index++] = APP_ALERT;
+            alert[index++] = 0;
+            alert[index++] = UPDATE;
+            alert[index++] = 0;
+
+            alert[index++] = UPDATE_KEY;
+            byte[] sB = string.getBytes();
+            alert[index++] = (byte) sB.length;
+            for(int i = 0; i<sB.length;i++){
+                alert[index++] = sB[i];
+            }
+
+            alert[index++] = UPDATED_VAL;
+            InetAddress address = InetAddress.getLocalHost();
+            byte[] addrB = address.getAddress();
+            alert[index++] = (byte) addrB.length;
+            for(int i = 0; i<addrB.length;i++)
+                alert[index++] = addrB[i];
+
+
+            System.out.println("Sending alert to fs...");
+            send(alert, address, FS_PORT);
 
             System.out.println("Hello from App!");
         }
         @Override
         public void run() {
-            try {
-                while(true)
-                    generatePackets();
-            } catch (InterruptedException | IOException e) {
-                e.printStackTrace();
-            }
+            // try {
+            //     while(true)
+            //         generatePackets();
+            // } catch (InterruptedException | IOException e) {
+            //     e.printStackTrace();
+            // }
         }
 
         private void generatePackets() throws InterruptedException, UnknownHostException, IOException{
@@ -304,8 +328,11 @@ public class EndNode {
                 headerInfo = interpretReply(data);
             else if(headerType==PACKET_HEADER)
                 headerInfo = interpretHeader(data);
-            else if(headerType== APP_ALERT)
-                headerInfo = interpretAlert(data);
+            else if(headerType== APP_ALERT){
+                interpretAlert(data);
+                return;
+            }
+                
 
             if(headerInfo == null){ // should not still be null
                 System.out.println("Header info is empty...");
@@ -384,7 +411,7 @@ public class EndNode {
             }
             index++; // skip len, irrelevant
             
-            if(data[index++]!=ROUTER_ID)
+            if(data[index++]!=UPDATE_KEY)
             {
                 System.out.println("Error 3");
                 return null;
@@ -530,10 +557,42 @@ public class EndNode {
             return ret;
         }
 
-        private byte[][] interpretAlert(byte[] data){
-            byte[][] ret = new byte[4][];
+        private void interpretAlert(byte[] data) throws UnknownHostException{
+            int index = 0;
+            if(data[index++] != APP_ALERT){
+                System.out.println("Error 1");
+                return;
+            }
+            index++; // can skip len
 
-            return ret;
+            if(data[index++] != UPDATE){
+                System.out.println("Error 2");
+                return;
+            }
+            index++; // can skip len
+
+            if(data[index++]!=UPDATE_KEY)
+            {
+                System.out.println("Error 3");
+                return;
+            }
+            int keyLen = data[index++]; 
+            byte[] keyToUpdate = new byte[keyLen];
+            for(int i = 0; i<keyLen;i++){
+                keyToUpdate[i] = data[index++];
+            }
+
+            if(data[index++]!=UPDATED_VAL)
+            {
+                System.out.println("Error 4");
+                return;
+            }
+            int updateLen = data[index++];
+            byte[] update = new byte[updateLen];
+            for(int i = 0; i<updateLen;i++){
+                update[i] =  data[index++];
+            }  
+            update(new String(keyToUpdate), InetAddress.getByAddress(update));
         }
 
         public void send(byte[] data,InetAddress address, int port) throws IOException{
