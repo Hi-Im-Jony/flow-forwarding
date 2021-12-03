@@ -1,3 +1,7 @@
+/*
+    @author Cornel Jonathan Cicai
+    Student Number: 19335265
+*/
 package Router;
 import java.io.IOException;
 import java.net.DatagramPacket;

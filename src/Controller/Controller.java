@@ -1,3 +1,8 @@
+/*
+    @author Cornel Jonathan Cicai
+    Student Number: 19335265
+*/
+
 package Controller;
 
 import java.io.IOException;

@@ -1,3 +1,7 @@
+/*
+    @author Cornel Jonathan Cicai
+    Student Number: 19335265
+*/
 package EndNode;
 
 import java.io.IOException;
