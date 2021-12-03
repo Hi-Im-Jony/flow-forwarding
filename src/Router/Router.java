@@ -168,7 +168,6 @@ public class Router {
             }
             else
                 contactController(data, dest);
-            Thread.sleep(100);
         }
 
         private static void update(String router, InetAddress address ){

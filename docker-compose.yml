@@ -14,13 +14,13 @@ services:
 
   2-router:
     image: router
-    command: java Router.java r2 a2
+    command: java Router.java r2 a2 r1
     depends_on:
       - controller
 
   3-router:
     image: router
-    command: java Router.java r3 a3 r4
+    command: java Router.java r3 a3 r1 r4
     depends_on:
       - controller
 

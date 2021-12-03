@@ -130,6 +130,7 @@ public class EndNode {
 
     private static class App extends Thread{
         private String string;
+        Random random = new Random(); // used to add randomness to packets
         App() throws IOException{
             string = appName;
 
@@ -164,25 +165,28 @@ public class EndNode {
         }
         @Override
         public void run() {
-            if(appName.equals("a1"))
-                try {
-                    while(true)
-                        generatePackets();
-                } catch (InterruptedException | IOException e) {
-                    e.printStackTrace();
-                }
+            
+            try {
+                while(true)
+                    generatePackets();
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+            }
         }
 
         private void generatePackets() throws InterruptedException, UnknownHostException, IOException{
-            String[] availableDests = {"a2","a3"};
-
-            Random random = new Random();
+            String[] availableDests = {"a1","a2","a3"}; // include any destinations here
 
             //hard coding a test for FS
             String p = "TESTING";
             byte[] pB = p.getBytes();
 
-            String destination = availableDests[random.nextInt(1)]; // destination in tests
+            String destination = availableDests[random.nextInt(3)]; // destination in tests
+
+            // make sure not sending to self
+            while(destination.equals(appName))
+                destination = availableDests[random.nextInt(3)];
+
             byte[] destB = destination.getBytes();
 
             byte[] packet = new byte[2+(2+destB.length)+(2+string.length())+2+1+2+pB.length];
@@ -215,7 +219,7 @@ public class EndNode {
                 packet[index++] = pB[i];
 
             
-            int sleepDuration = random.nextInt(5-2 +1)+2; // pick "random" time to sleep
+            int sleepDuration = random.nextInt(5)+1; // pick "random" time to sleep
             Thread.sleep(sleepDuration*1000);
             System.out.println("Sending: " + new String(packet));
             send(packet, InetAddress.getLocalHost(), FS_PORT);
@@ -272,7 +276,6 @@ public class EndNode {
             }
             else
                 contactController(data, dest);
-            Thread.sleep(100);
         }
 
         private  void update(String router, InetAddress address ){
