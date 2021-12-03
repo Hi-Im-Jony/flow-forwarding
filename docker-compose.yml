@@ -6,6 +6,7 @@ services:
     command: java Controller.java
 
   1-router:
+    image: router
     build: src/Router/
     command: java Router.java 1 2 4
     links:
@@ -15,11 +16,12 @@ services:
       - 2-router
 
   1-forwarding-service:
+    image: forwarding-service
     build: src/ForwardingService
     command: java ForwardingService.java 1
 
   2-router:
-    build: src/Router/
+    image: router
     command: java Router.java 2
     links:
       - "2-forwarding-service:fs"
@@ -27,11 +29,11 @@ services:
       - controller
 
   2-forwarding-service:
-    build: src/ForwardingService
+    image: forwarding-service
     command: java ForwardingService.java 2
 
   3-router:
-    build: src/Router/
+    image: router
     command: java Router.java 3 5
     links:
       - "3-forwarding-service:fs"
@@ -39,11 +41,11 @@ services:
       - controller
 
   3-forwarding-service:
-    build: src/ForwardingService
+    image: forwarding-service
     command: java ForwardingService.java 3
 
   4-router:
-    build: src/Router/
+    image: router
     command: java Router.java 4 3
     links:
       - "4-forwarding-service:fs"
@@ -51,11 +53,11 @@ services:
       - controller
 
   4-forwarding-service:
-    build: src/ForwardingService
+    image: forwarding-service
     command: java ForwardingService.java 4
 
   5-router:
-    build: src/Router/
+    image: router
     command: java Router.java 5
     links:
       - "5-forwarding-service:fs"
@@ -63,7 +65,7 @@ services:
       - controller
 
   5-forwarding-service:
-    build: src/ForwardingService
+    image: forwarding-service
     command: java ForwardingService.java 5
 
   tcpdump:
