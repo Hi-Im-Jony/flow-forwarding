@@ -120,8 +120,8 @@ public class ForwardingService  {
         // extract data from packet
         data= packet.getData();
 
-        if(routerID.equals("3"))
-            System.out.println("FS received: \""+new String(data)+",\" from: "+packet.getAddress());
+        
+        System.out.println("FS received: \""+new String(data)+",\" from: "+packet.getAddress());
 
         // Extract header information
         byte[][] headerInfo = null;

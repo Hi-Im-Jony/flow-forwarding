@@ -32,7 +32,7 @@ services:
 
   3-router:
     build: src/Router/
-    command: java Router.java 3
+    command: java Router.java 3 5
     links:
       - "3-forwarding-service:fs"
     depends_on:
@@ -54,17 +54,17 @@ services:
     build: src/ForwardingService
     command: java ForwardingService.java 4
 
-  # 5-router:
-  #   build: src/Router/
-  #   command: java Router.java 5
-  #   links:
-  #     - "5-forwarding-service:fs"
-  #   depends_on:
-  #     - controller
+  5-router:
+    build: src/Router/
+    command: java Router.java 5
+    links:
+      - "5-forwarding-service:fs"
+    depends_on:
+      - controller
 
-  # 5-forwarding-service:
-  #   build: src/ForwardingService
-  #   command: java ForwardingService.java 5
+  5-forwarding-service:
+    build: src/ForwardingService
+    command: java ForwardingService.java 5
 
   tcpdump:
     image: kaazing/tcpdump

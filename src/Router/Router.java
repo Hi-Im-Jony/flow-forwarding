@@ -99,7 +99,7 @@ public class Router {
             String p = "TESTING";
             byte[] pB = p.getBytes();
 
-            String s = "4";
+            String s = "5"; // destination in tests
             byte[] sB = s.getBytes();
 
             byte[] packet = new byte[2+(2+sB.length)+(2+name.length())+2+1+2+pB.length];
