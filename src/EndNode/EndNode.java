@@ -164,22 +164,25 @@ public class EndNode {
         }
         @Override
         public void run() {
-            // try {
-            //     while(true)
-            //         generatePackets();
-            // } catch (InterruptedException | IOException e) {
-            //     e.printStackTrace();
-            // }
+            if(appName.equals("a1"))
+                try {
+                    while(true)
+                        generatePackets();
+                } catch (InterruptedException | IOException e) {
+                    e.printStackTrace();
+                }
         }
 
         private void generatePackets() throws InterruptedException, UnknownHostException, IOException{
+            String[] availableDests = {"a2","a3"};
+
             Random random = new Random();
 
             //hard coding a test for FS
             String p = "TESTING";
             byte[] pB = p.getBytes();
 
-            String destination = "r5"; // destination in tests
+            String destination = availableDests[random.nextInt(1)]; // destination in tests
             byte[] destB = destination.getBytes();
 
             byte[] packet = new byte[2+(2+destB.length)+(2+string.length())+2+1+2+pB.length];
@@ -204,7 +207,7 @@ public class EndNode {
             
             packet[index++] = PACKET_TYPE;
             packet[index++] = 1;
-            packet[index++] = 'p';
+            packet[index++] = '0';
 
             packet[index++] = PACKET;
             packet[index++] = (byte) pB.length;
