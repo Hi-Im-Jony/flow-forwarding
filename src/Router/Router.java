@@ -235,9 +235,6 @@ public class Router {
             // check dest format
 
             int index = 0;
-            int x = data.length;
-            x = name.length();
-            x = dest.length();
             byte[] fsRequest = new byte[2+(2+dest.length()+2+name.length()+data.length)];
 
             fsRequest[index++] = FS_REQUEST;
