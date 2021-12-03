@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class EndNode {
-    // header types
+    // header items
     final static int CONTROLLER_REPLY = -1; // wraps header to signify packet is a reply from Controller
     final static int APP_ALERT = -15; // an alert from an App to a FS that it wants to receive stuff
         final static int UPDATE = -2; // always length 2, first value is id of router to change, second value is updated data
@@ -36,7 +36,7 @@ public class EndNode {
         
 
 
-    final static int MTU = 1500;
+    final static int MTU = 1460;
     final static int FS_PORT = 51510;
     final static int EN_PORT = 8080;
     final static int APP_PORT = 80;

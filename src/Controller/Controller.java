@@ -6,18 +6,19 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 public class Controller {
-    // header types
+
+    // header items
     final static int CONTROLLER_REPLY = -1; // wraps header to signify packet is a reply from Controller
+    final static int APP_ALERT = -15; // an alert from an App to a FS that it wants to receive stuff
         final static int UPDATE = -2; // always length 2, first value is id of router to change, second value is updated data
-            final static int ROUTER_ID = -3; // ID of router that will be updated
+            final static int UPDATE_KEY = -3; // ID of router that will be updated
             final static int UPDATED_VAL = -4; // value to update to
     
     final static int FS_REQUEST = -5; // wraps header to signify that packet is a request from a Forwarding Service
-        final static int QUERY = -6; // name of router we are asking about
+        final static int QUERY = -6; // appName of router we are asking about
         // include REQUESTOR_NAME (declared further below)
         
         final static int PACKET_HEADER = -7; // wraps packets header info
@@ -30,18 +31,13 @@ public class Controller {
         final static int REQUESTOR_NAME = -13; // ID of FS
         final static int CONNECT_TO = -14; // router to connect to
     
-    final static int APP_ALERT = -15; // an alert from an App to a FS that it wants to receive stuff
-        // REQUESTOR_NAME must be included;
-        final static int STRING = -16; // string to associate with app
-        
-    
     private static HashMap<String, ArrayList<String>> connections;   
     private static HashMap<String, InetAddress> addresses; 
     
     static DatagramSocket socket;
     
     final static int FS_PORT = 51510;
-    final static int MTU = 1500;
+    final static int MTU = 1460;
     public static void main(String[] args) throws IOException {
         // init stuff
         connections = new HashMap<>();
@@ -104,7 +100,7 @@ public class Controller {
         reply[replyIndex++] = UPDATE;
         reply[replyIndex++] = 0;
 
-        reply[replyIndex++] = ROUTER_ID;
+        reply[replyIndex++] = UPDATE_KEY;
         reply[replyIndex++] = (byte) query.length();
         for(int i = 0; i< queryB.length;i++)
             reply[replyIndex++] = queryB[i];
