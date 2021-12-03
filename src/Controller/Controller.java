@@ -183,6 +183,9 @@ public class Controller {
             return; // finished
 
         ArrayList<String> neighbours = connections.get(current);
+
+        if(neighbours==null)
+            return;
         
         double closestDistance = Double.POSITIVE_INFINITY;
         String closest = "";

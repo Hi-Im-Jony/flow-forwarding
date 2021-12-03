@@ -94,7 +94,7 @@ public class Router {
         System.out.println("Hello from Router "+name);
         
         //hard coding a test for FS
-        if(name.equals("Jonathan")){
+        if(name.equals("1")){
             byte[] packet = new byte[MTU];
 
             index = 0;
@@ -102,7 +102,7 @@ public class Router {
             packet[index++] = 0;
 
             packet[index++] = DESTINATION_ID;
-            String s = "scss";
+            String s = "5";
             byte[] sB = s.getBytes();
             packet[index++] = (byte) sB.length;
             for(int i = 0; i<sB.length; i++){
