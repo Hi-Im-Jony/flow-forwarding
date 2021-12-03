@@ -43,12 +43,18 @@ public class ForwardingService  {
     private static String client; // name of client using forwarding service
 
     public static void main(String[] args) throws IOException, InterruptedException {
+
+        if(args.length !=1){
+            System.out.println("Missing init parameter, please indicate this services client in the docker-compose file!");
+            System.out.println("Eg: 'command: java ForwardingService.java <insert client_name>'");
+            return;
+        }
         // init
         forwardingTable = new HashMap<>();
         socket = new DatagramSocket(FS_PORT);
 
-        if(args.length>0)
-            client = args[0]; // when directly connected to a router on a "local machine"
+        
+        client = args[0]; // when directly connected to a router on a "local machine"
 
         System.out.println("Hello from FS");
 
