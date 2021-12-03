@@ -181,9 +181,6 @@ public class Router {
     private static class ForwardingService extends Thread {
     
         
-        final static int MTU = 1500;
-        final static int ROUTER_PORT = 80;
-        final static int FS_PORT = 51510;
 
         private static HashMap<String, InetAddress> forwardingTable;
         private static DatagramSocket socket;
