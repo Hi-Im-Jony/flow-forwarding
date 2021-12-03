@@ -36,6 +36,13 @@ services:
     depends_on:
       - controller
 
+  1-end:
+    image: end
+    build: src/EndNode/
+    command: java EndNode.java a1 r1
+    depends_on:
+      - 1-router
+
   tcpdump:
     image: kaazing/tcpdump
     volumes:

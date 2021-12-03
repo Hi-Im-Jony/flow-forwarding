@@ -46,7 +46,7 @@ public class EndNode {
 
     public static void main(String[] args) throws IOException {
 
-        if(args.length>1){
+        if(args.length<2){
             System.out.println("Incorrect args for EndNode, please pass in node name and default router ");
             return;
         }
