@@ -8,65 +8,27 @@ services:
   1-router:
     image: router
     build: src/Router/
-    command: java Router.java 1 2 4
-    links:
-      - "1-forwarding-service:fs"
+    command: java Router.java r1 r2 r4
     depends_on:
       - controller
-      - 2-router
-
-  1-forwarding-service:
-    image: forwarding-service
-    build: src/ForwardingService
-    command: java ForwardingService.java 1
 
   2-router:
     image: router
-    command: java Router.java 2
-    links:
-      - "2-forwarding-service:fs"
+    command: java Router.java r2
     depends_on:
       - controller
-
-  2-forwarding-service:
-    image: forwarding-service
-    command: java ForwardingService.java 2
 
   3-router:
     image: router
-    command: java Router.java 3 5
-    links:
-      - "3-forwarding-service:fs"
+    command: java Router.java r3 r4
     depends_on:
       - controller
-
-  3-forwarding-service:
-    image: forwarding-service
-    command: java ForwardingService.java 3
 
   4-router:
     image: router
-    command: java Router.java 4 3
-    links:
-      - "4-forwarding-service:fs"
+    command: java Router.java r4
     depends_on:
       - controller
-
-  4-forwarding-service:
-    image: forwarding-service
-    command: java ForwardingService.java 4
-
-  5-router:
-    image: router
-    command: java Router.java 5
-    links:
-      - "5-forwarding-service:fs"
-    depends_on:
-      - controller
-
-  5-forwarding-service:
-    image: forwarding-service
-    command: java ForwardingService.java 5
 
   tcpdump:
     image: kaazing/tcpdump
