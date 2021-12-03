@@ -40,14 +40,15 @@ public class ForwardingService  {
 
     private static HashMap<String, InetAddress> forwardingTable;
     private static DatagramSocket socket;
-    private static String routerID; // ID of parent router
+    private static String client; // name of client using forwarding service
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // init
         forwardingTable = new HashMap<>();
         socket = new DatagramSocket(FS_PORT);
 
-        routerID = args[0];
+        if(args.length>0)
+            client = args[0]; // when directly connected to a router on a "local machine"
 
         System.out.println("Hello from FS");
 
@@ -59,7 +60,7 @@ public class ForwardingService  {
         String[] dests = dest.split(".");
         if(dests.length>1)
             dest = dests[0]; // only interested in next "hop"
-        else if(dest.equals(routerID)){
+        else if(dest.equals(client)){
             System.out.println("Destination reached!");
             return;
         }
@@ -84,7 +85,7 @@ public class ForwardingService  {
         // check dest format
 
         int index = 0;
-        byte[] fsRequest = new byte[2+(2+dest.length()+2+routerID.length()+data.length)];
+        byte[] fsRequest = new byte[2+(2+dest.length()+2+client.length()+data.length)];
 
         fsRequest[index++] = FS_REQUEST;
         fsRequest[index++] = 1;
@@ -96,8 +97,8 @@ public class ForwardingService  {
             fsRequest[index++] = destB[i];
 
         fsRequest[index++] = REQUESTOR_NAME;
-        fsRequest[index++] = (byte) routerID.length();
-        byte[] idB = routerID.getBytes();
+        fsRequest[index++] = (byte) client.length();
+        byte[] idB = client.getBytes();
         for(int i = 0; i<idB.length;i++){
             fsRequest[index++] = idB[i];
         }
@@ -144,7 +145,7 @@ public class ForwardingService  {
 
         if(dests.length>1){
             String prefix = dests[0]; // next hop
-            if(prefix.equals(routerID)){ // we can drop the prefix
+            if(prefix.equals(client)){ // we can drop the prefix
                 // drop prefix
                 dest = "";
                 for(int i = 1; i<dests.length;i++){
