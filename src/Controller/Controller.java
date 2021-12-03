@@ -170,46 +170,47 @@ public class Controller {
 
     private static void runDijkstra(String start, String current, String end, 
     HashMap<String, Boolean> visitedNodes, HashMap<String, HashMap<String,Double>> distances, HashMap<String,String> previousNodes){
+        visitedNodes.put(current, true);
+
         System.out.println("Current is: "+current);
         if(current.equals(end))
             return;
 
-        boolean allVisited = true; // assume true
-        for(Boolean nodeVisited: visitedNodes.values())
-            allVisited = allVisited && nodeVisited;
-
-        System.out.println(visitedNodes.size());
-        if(allVisited)
-            return; // finished
-
         ArrayList<String> neighbours = connections.get(current);
-
-        if(neighbours==null)
-            return;
-        
-        double closestDistance = Double.POSITIVE_INFINITY;
-        String closest = "";
+                
+        if(neighbours!=null)
         for(String neighbour: neighbours){
-            if(!visitedNodes.get(neighbour)){
-                double knownDistance = distances.get(start).get(neighbour); // get known distance
-                double newDistance = distances.get(start).get(current)+1; // get current distance
+            
+            double newDistance = distances.get(start).get(current)+1; // get current distance
+            double knownDistance = distances.get(start).get(neighbour); // get known distance
+            
 
-                double smallestDistance = (knownDistance>newDistance)? newDistance:knownDistance; // check which is smallest
-                distances.get(start).put(neighbour, smallestDistance); // update table
+            double smallestDistance = (knownDistance>newDistance)? newDistance:knownDistance; // check which is smallest
+            distances.get(start).put(neighbour, smallestDistance); // update table
 
-                if(smallestDistance<knownDistance)
-                    previousNodes.put(neighbour, current); // update previous vertex if needed
+            if(smallestDistance<knownDistance)
+                previousNodes.put(neighbour, current); // update previous vertex if needed
+        }
 
-                // track closest neighbour
-                if(closestDistance>smallestDistance){
-                    closest = neighbour;
-                    closestDistance = smallestDistance;
-                }
+        // check if we are done
+        boolean allVisited = true;
+        for(boolean visited : visitedNodes.values())
+            allVisited = allVisited && visited;
+
+        if(allVisited)
+            return;
+
+        // find closest unvisited
+        String closest ="";
+        for(String node : visitedNodes.keySet()){
+            if(!visitedNodes.get(node)){
+                if(closest.equals(""))
+                    closest = node;
+                else if(distances.get(start).get(closest)>distances.get(start).get(node))
+                    closest = node;
             }
         }
-        visitedNodes.put(current, true);
         current = closest;
-        
         runDijkstra(start, current, end, visitedNodes, distances, previousNodes);
         
     }
