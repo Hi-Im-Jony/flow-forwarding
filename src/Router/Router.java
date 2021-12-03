@@ -93,55 +93,55 @@ public class Router {
 
         System.out.println("Hello from Router "+name);
         
-        //hard coding a test for FS
-        if(name.equals("1")){
+        // //hard coding a test for FS
+        // if(name.equals("1")){
 
-            String p = "TESTING";
-            byte[] pB = p.getBytes();
+        //     String p = "TESTING";
+        //     byte[] pB = p.getBytes();
 
-            String s = "5"; // destination in tests
-            byte[] sB = s.getBytes();
+        //     String s = "5"; // destination in tests
+        //     byte[] sB = s.getBytes();
 
-            byte[] packet = new byte[2+(2+sB.length)+(2+name.length())+2+1+2+pB.length];
+        //     byte[] packet = new byte[2+(2+sB.length)+(2+name.length())+2+1+2+pB.length];
             
 
-            index = 0;
-            packet[index++] = PACKET_HEADER;
-            packet[index++] = (byte) (2+sB.length+2+name.length()+3+2+pB.length);
+        //     index = 0;
+        //     packet[index++] = PACKET_HEADER;
+        //     packet[index++] = (byte) (2+sB.length+2+name.length()+3+2+pB.length);
 
-            packet[index++] = DESTINATION_ID;
-            packet[index++] = (byte) sB.length;
-            for(int i = 0; i<sB.length; i++){
-                packet[index++] = sB[i];
-            }
+        //     packet[index++] = DESTINATION_ID;
+        //     packet[index++] = (byte) sB.length;
+        //     for(int i = 0; i<sB.length; i++){
+        //         packet[index++] = sB[i];
+        //     }
                 
 
-            packet[index++] = SOURCE_ID;
-            packet[index++] = (byte) name.length();
-            byte[] nameB = name.getBytes();
-            for(int i = 0;i<nameB.length;i++)
-                packet[index++] = nameB[i];
+        //     packet[index++] = SOURCE_ID;
+        //     packet[index++] = (byte) name.length();
+        //     byte[] nameB = name.getBytes();
+        //     for(int i = 0;i<nameB.length;i++)
+        //         packet[index++] = nameB[i];
             
-            packet[index++] = PACKET_TYPE;
-            packet[index++] = 1;
-            packet[index++] = 'p';
+        //     packet[index++] = PACKET_TYPE;
+        //     packet[index++] = 1;
+        //     packet[index++] = 'p';
 
-            packet[index++] = PACKET;
-            packet[index++] = (byte) pB.length;
-            for(int i = 0; i<pB.length; i++)
-                packet[index++] = pB[i];
+        //     packet[index++] = PACKET;
+        //     packet[index++] = (byte) pB.length;
+        //     for(int i = 0; i<pB.length; i++)
+        //         packet[index++] = pB[i];
 
             
             
-            while(true){
-                Thread.sleep(3000);
-                System.out.println("Sending: " + new String(packet));
-                send(packet, InetAddress.getByName("fs"), FS_PORT);
+        //     while(true){
+        //         Thread.sleep(3000);
+        //         System.out.println("Sending: " + new String(packet));
+        //         send(packet, InetAddress.getByName("fs"), FS_PORT);
                 
-            }
+        //     }
 
             
-        }
+        // }
         while(true){
                 receive();
             }
