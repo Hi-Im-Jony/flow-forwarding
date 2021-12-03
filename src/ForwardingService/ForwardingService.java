@@ -42,7 +42,7 @@ public class ForwardingService  {
     private static DatagramSocket socket;
     private static String routerID; // ID of parent router
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         // init
         forwardingTable = new HashMap<>();
         socket = new DatagramSocket(FS_PORT);
@@ -55,16 +55,24 @@ public class ForwardingService  {
             receive();
     }
 
-    private static void forward(byte[] data, String dest) throws IOException{
+    private static void forward(byte[] data, String dest) throws IOException, InterruptedException{
+        String[] dests = dest.split(".");
+        if(dests.length>1)
+            dest = dests[0]; // only interested in next "hop"
+        else if(dest.equals(routerID)){
+            System.out.println("Destination reached!");
+            return;
+        }
         if(forwardingTable.containsKey(dest)){
             InetAddress address = forwardingTable.get(dest);
-            System.out.println("Forwarding:"+new String(data)+", to "+address.getHostName());
-            System.out.println("Dest addr is "+ address.toString());
+            //System.out.println("Forwarding:"+new String(data)+", to "+address.getHostName());
+            //System.out.println("Dest addr is "+ address.toString());
             send(data, address, ROUTER_PORT);
-            System.out.println("Sent...");
+            //System.out.println("Sent...");
         }
         else
             contactController(data, dest);
+        Thread.sleep(100);
     }
 
     private static void update(String router, InetAddress address ){
@@ -74,9 +82,6 @@ public class ForwardingService  {
     private static void contactController(byte[] data, String dest) throws IOException{
         //System.out.println("Contacting controller about: "+dest);
         // check dest format
-        String[] dests = dest.split(".");
-        if(dests.length>0)
-            dest = dests[0]; // only interested in next "hop"
 
         int index = 0;
         byte[] fsRequest = new byte[2+(2+dest.length()+2+routerID.length()+data.length)];
@@ -105,7 +110,7 @@ public class ForwardingService  {
         send(fsRequest, InetAddress.getByName("controller"), 42);
     }
 
-    public static void receive() throws IOException{
+    public static void receive() throws IOException, InterruptedException{
             
         byte[] data= new byte[MTU];
         DatagramPacket packet= new DatagramPacket(data, data.length);
@@ -115,7 +120,8 @@ public class ForwardingService  {
         // extract data from packet
         data= packet.getData();
 
-         System.out.println("FS received: \""+new String(data)+",\" from: "+packet.getAddress());
+        if(routerID.equals("3"))
+            System.out.println("FS received: \""+new String(data)+",\" from: "+packet.getAddress());
 
         // Extract header information
         byte[][] headerInfo = null;
@@ -148,6 +154,7 @@ public class ForwardingService  {
             }
 
         }
+        System.out.println("Dest: "+dest);
         byte[] destInBytes = dest.getBytes();
 
         // redo header to change dest field

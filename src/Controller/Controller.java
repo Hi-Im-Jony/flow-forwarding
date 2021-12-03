@@ -117,9 +117,11 @@ public class Controller {
             reply[replyIndex++] =nextB[i];
         }
 
+        byte packetHeaderLen = data[index+1];
         // copy rest of data into reply
-        for(int i = index; i<data.length;i++){
-            reply[replyIndex++] = data[i];
+        for(int i = index; i<packetHeaderLen+index;i++){
+            byte x = data[i];
+            reply[replyIndex++] = x;
         }
 
         send(reply, reqAddress, FS_PORT);
@@ -158,7 +160,7 @@ public class Controller {
         int counter = 0;
         while(counter<previousNodes.size()){
             previousNode = previousNodes.get(currentNode);
-            if(previousNode.equals(start))
+            if(previousNode != null && previousNode.equals(start))
                 return currentNode;
             currentNode = previousNodes.get(currentNode);
             counter++;

@@ -95,15 +95,21 @@ public class Router {
         
         //hard coding a test for FS
         if(name.equals("1")){
-            byte[] packet = new byte[MTU];
+
+            String p = "TESTING";
+            byte[] pB = p.getBytes();
+
+            String s = "4";
+            byte[] sB = s.getBytes();
+
+            byte[] packet = new byte[2+(2+sB.length)+(2+name.length())+2+1+2+pB.length];
+            
 
             index = 0;
             packet[index++] = PACKET_HEADER;
-            packet[index++] = 0;
+            packet[index++] = (byte) (2+sB.length+2+name.length()+3+2+pB.length);
 
             packet[index++] = DESTINATION_ID;
-            String s = "5";
-            byte[] sB = s.getBytes();
             packet[index++] = (byte) sB.length;
             for(int i = 0; i<sB.length; i++){
                 packet[index++] = sB[i];
@@ -121,8 +127,6 @@ public class Router {
             packet[index++] = 'p';
 
             packet[index++] = PACKET;
-            String p = "TESTING";
-            byte[] pB = p.getBytes();
             packet[index++] = (byte) pB.length;
             for(int i = 0; i<pB.length; i++)
                 packet[index++] = pB[i];
@@ -130,9 +134,10 @@ public class Router {
             
             
             while(true){
+                Thread.sleep(3000);
                 System.out.println("Sending: " + new String(packet));
                 send(packet, InetAddress.getByName("fs"), FS_PORT);
-                Thread.sleep(2000);
+                
             }
 
             
@@ -152,7 +157,8 @@ public class Router {
         // extract data from packet
         data= packet.getData();
 
-        System.out.println("Router received: \""+data+",\" from: "+packet.getAddress());
+        
+        System.out.println("Router received: \""+new String(data)+",\" from: "+packet.getAddress());
         
         InetAddress address= InetAddress.getByName("fs");
         send(data, address, FS_PORT); // send to forwarding service
